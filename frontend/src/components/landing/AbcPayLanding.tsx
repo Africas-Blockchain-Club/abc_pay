@@ -375,7 +375,7 @@ function Nav() {
 
         <div className="hidden md:flex items-center gap-3">
           <Link href="/login" className="text-sm font-medium hover:opacity-60 transition-opacity" style={{ color: C.navy }}>Sign in</Link>
-          <Link href="/merchant/qr-generate" className="px-4 py-2 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity"
+          <Link href="/login" className="px-4 py-2 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity"
             style={{ background: C.orange }}>
             Start accepting payments
           </Link>
