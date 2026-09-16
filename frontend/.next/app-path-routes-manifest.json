@@ -1,0 +1,16 @@
+{
+  "/(auth)/login/page": "/login",
+  "/(auth)/register/page": "/register",
+  "/(dashboard)/approve/[id]/page": "/approve/[id]",
+  "/(dashboard)/kyc/complete/page": "/kyc/complete",
+  "/(dashboard)/merchant/qr-generate/page": "/merchant/qr-generate",
+  "/(dashboard)/payments/page": "/payments",
+  "/(dashboard)/receipt/[id]/page": "/receipt/[id]",
+  "/(dashboard)/scan/page": "/scan",
+  "/(dashboard)/verify/page": "/verify",
+  "/(dashboard)/wallet/page": "/wallet",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}

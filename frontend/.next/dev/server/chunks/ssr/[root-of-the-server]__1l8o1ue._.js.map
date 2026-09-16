@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///home/g33k/Documents/Projects/abc_pay/frontend/src/app/(dashboard)/scan/page.tsx"],"sourcesContent":["export default function ScanPage() {\n  return (\n    <section>\n      <div className=\"eyebrow\">Customer payment</div>\n      <h1 style={{ fontSize: \"3rem\" }}>Scan & pay</h1>\n      <p className=\"lead\">The QR scanner/payment-request flow plugs in here. For the MVP, this page is the boundary between the web UI and the payment API.</p>\n      <div className=\"card\"><h2>Next payment step</h2><p className=\"muted\">Read a merchant payment request → fetch a quote → confirm → submit blockchain payment → track status.</p></div>\n    </section>\n  );\n}\n"],"names":["ScanPage","className","style","fontSize"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBACE,8OAAC;;0BACC,8OAAC;gBAAIC,WAAU;0BAAU;;;;;;0BACzB,8OAAC;gBAAGC,OAAO;oBAAEC,UAAU;gBAAO;0BAAG;;;;;;0BACjC,8OAAC;gBAAEF,WAAU;0BAAO;;;;;;0BACpB,8OAAC;gBAAIA,WAAU;;kCAAO,8OAAC;kCAAG;;;;;;kCAAsB,8OAAC;wBAAEA,WAAU;kCAAQ;;;;;;;;;;;;;;;;;;AAG3E"}},
+    {"offset": {"line": 87, "column": 0}, "map": {"version":3,"sources":["file:///home/g33k/Documents/Projects/abc_pay/frontend/src/app/favicon.ico.mjs%20(structured%20image%20object)"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 256, height: 256 }\n"],"names":["src","width","height"],"mappings":";;;;AAAA;;uCACe;IAAEA,KAAAA,sJAAG;IAAEC,OAAO;IAAKC,QAAQ;AAAI"}}]
+}
