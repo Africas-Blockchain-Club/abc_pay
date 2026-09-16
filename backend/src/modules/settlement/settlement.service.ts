@@ -8,11 +8,7 @@ export interface MerchantPayoutCalculation {
 }
 
 export class SettlementService {
-  /**
-   * Calculates net merchant payout amounts from approved/completed payments.
-   * Strictly reads fee/reserved-amount fields (merchantNetZar) per Dev 2's ledger logic.
-   * Does NOT recompute or alter fee calculations.
-   */
+  
   calculateMerchantPayouts(
     payments: Array<{
       id: string;

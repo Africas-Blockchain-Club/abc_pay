@@ -105,7 +105,6 @@ export function verifyDiditWebhookSignature(
 
 // Stub with a clear interface for compliance/support queue
 export async function notifyCompliance(userId: string, status: string, details?: unknown): Promise<void> {
-  // TODO: Dispatch to compliance queue (e.g. BullMQ, SQS, Slack, or email)
   console.log(`[Compliance Queue] User ${userId} KYC status: ${status}`, details ?? "");
 }
 

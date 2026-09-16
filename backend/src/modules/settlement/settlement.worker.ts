@@ -34,10 +34,6 @@ export interface SettlementBatchResult {
   settlementIds: string[];
 }
 
-/**
- * Scheduled/queued job processing pending settlements and executing payouts via BankPayoutProvider.
- * Stub with a clean interface so it can be wired into BullMQ, a cron runner, or manual triggers.
- */
 export async function runSettlementBatch(
   provider: BankPayoutProvider = defaultBankPayoutProvider
 ): Promise<SettlementBatchResult> {
