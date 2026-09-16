@@ -15,7 +15,6 @@ export function createApp(store: AppStore) {
   app.use(helmet());
   app.use(cors({ origin: env.frontendUrl, credentials: true }));
 
-  // MUST be mounted with express.raw before any global express.json() middleware
   app.post(
     "/api/webhooks/didit",
     express.raw({ type: "application/json" }),
@@ -37,7 +36,7 @@ export function createApp(store: AppStore) {
   app.use("/api/v1/auth", createAuthRouter(store));
   app.use("/api/v1/wallets", createWalletRouter(store));
 
-  // KYC module routes (/api/kyc and /api/v1/kyc)
+  // KYC module routes
   app.use("/api/kyc", kycRouter);
   app.use("/api/v1/kyc", kycRouter);
 

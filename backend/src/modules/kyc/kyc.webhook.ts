@@ -73,13 +73,13 @@ export function verifyDiditWebhookSignature(
 ): boolean {
   if (!signatureV2 || !timestamp || !secret) return false;
 
-  // 1. Reject anything older than 300s (5 minutes)
+  // Reject anything older than 5 minutes
   const parsedTimestamp = parseInt(timestamp, 10);
   if (Number.isNaN(parsedTimestamp)) return false;
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - parsedTimestamp) > 300) return false;
 
-  // 2. Recompute HMAC-SHA256 against canonical JSON
+  // Recompute HMAC-SHA256 against canonical JSON
   try {
     let parsed: unknown;
     if (Buffer.isBuffer(rawBody)) {
@@ -94,7 +94,7 @@ export function verifyDiditWebhookSignature(
 
     const expected = computeSignatureV2(parsed, secret);
 
-    // 3. Constant-time compare
+    // Constant-time compare
     const a = Buffer.from(expected, "utf8");
     const b = Buffer.from(signatureV2, "utf8");
     return a.length === b.length && crypto.timingSafeEqual(a, b);
