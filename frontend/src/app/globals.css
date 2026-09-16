@@ -1,3 +1,22 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Limit the landing page reset to its own content, preserving existing screens. */
+@layer base {
+  .landing-page { background: #fff; color: #0f1f3d; line-height: 1.5; }
+  .landing-page *, .landing-page ::before, .landing-page ::after {
+    box-sizing: border-box; margin: 0; padding: 0; border: 0 solid;
+  }
+  .landing-page :is(h1, h2, h3, h4, h5, h6) { font-size: inherit; font-weight: inherit; }
+  .landing-page :is(button, input) { font: inherit; color: inherit; background: transparent; }
+  .landing-page button { cursor: pointer; }
+  .landing-page :is(img, svg) { display: block; vertical-align: middle; }
+  .landing-page img { max-width: 100%; height: auto; }
+  .landing-page ::selection { background: #fcd5b0; color: #0f1f3d; }
+}
+
+@layer components {
 :root {
   --bg: #070b12;
   --surface: #101722;
@@ -24,15 +43,15 @@ button, input { font: inherit; }
 .navLinks { display: flex; align-items: center; gap: 18px; color: var(--muted); }
 .hero { padding: 96px 0 72px; display: grid; gap: 28px; }
 .eyebrow { color: var(--brand); font-size: .82rem; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
-h1 { font-size: clamp(2.5rem, 7vw, 5rem); line-height: .98; letter-spacing: -.06em; margin: 0; max-width: 850px; }
-h2 { margin-top: 0; letter-spacing: -.03em; }
+:where(.shell, .dashboard) h1 { font-size: clamp(2.5rem, 7vw, 5rem); line-height: .98; letter-spacing: -.06em; margin: 0; max-width: 850px; }
+:where(.shell, .dashboard) h2 { margin-top: 0; letter-spacing: -.03em; }
 .lead { color: var(--muted); max-width: 660px; font-size: 1.08rem; line-height: 1.7; }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .button { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 12px 18px; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .button.primary { background: var(--brand-strong); border-color: var(--brand-strong); color: #032116; font-weight: 800; }
 .button.ghost { background: transparent; }
 .card { background: linear-gradient(180deg, var(--surface), #0b111a); border: 1px solid var(--border); border-radius: 18px; padding: 24px; }
-.grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+:where(.shell, .dashboard) .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .muted { color: var(--muted); }
 .authWrap { min-height: calc(100vh - 72px); display: grid; place-items: center; padding: 40px 0; }
 .authCard { width: min(460px, 100%); }
@@ -56,4 +75,6 @@ h2 { margin-top: 0; letter-spacing: -.03em; }
   .sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
   .sideNav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .main { padding: 22px 16px; }
+}
+
 }
