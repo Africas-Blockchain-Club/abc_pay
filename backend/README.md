@@ -1,5 +1,50 @@
 ABC Pay MVP
 
+## Quick start: run the whole project
+
+Make sure Node.js, npm, and Docker with Docker Compose are installed, and Docker is running. Run the following commands from the project root (`abc_pay_mvp/`), which contains both `frontend/` and `backend/`. If your terminal is currently inside `backend/`, run `cd ..` first.
+
+### First-time setup
+
+```bash
+npm install
+
+# Create environment files without overwriting existing settings
+test -f backend/.env || cp backend/.env.example backend/.env
+test -f frontend/.env.local || cp frontend/.env.example frontend/.env.local
+
+# Start PostgreSQL
+docker compose up -d postgres
+
+# Generate the Prisma client and apply database migrations
+npm run prisma:generate -w backend
+npm run prisma:migrate -w backend
+
+# Start both the frontend and backend
+npm run dev
+```
+
+Before starting the app, set `JWT_SECRET` in `backend/.env` to a long random secret. The example database settings match the PostgreSQL service in `docker-compose.yml`.
+
+Open:
+
+- App: http://localhost:3000
+- Backend: http://localhost:4000
+- Backend health check: http://localhost:4000/api/v1/health
+
+### Subsequent runs
+
+From the project root:
+
+```bash
+docker compose up -d postgres
+npm run dev
+```
+
+Press **Ctrl+C** to stop the frontend and backend. To also stop PostgreSQL, run `docker compose stop postgres`.
+
+To run each application in a separate terminal, use `npm run dev -w backend` in one and `npm run dev -w frontend` in the other, both from the project root.
+
 ABC Pay is a web-based payment MVP designed to support crypto and stablecoin payments while allowing merchants to ultimately receive fiat settlement.
 
 The project originally started as a standard Next.js application, but the architecture has been updated to separate the frontend from the backend.
