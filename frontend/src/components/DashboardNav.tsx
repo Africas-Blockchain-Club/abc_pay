@@ -17,6 +17,7 @@ export function DashboardNav() {
       <Link className="brand" href="/wallet">ABC<span>Pay</span></Link>
       <nav className="sideNav">
         <Link href="/wallet">Wallet</Link>
+        <Link href="/verify">Verify ID</Link>
         <Link href="/scan">Scan & pay</Link>
         <Link href="/payments">Payments</Link>
         <Link href="/merchant/qr-generate">Merchant QR</Link>

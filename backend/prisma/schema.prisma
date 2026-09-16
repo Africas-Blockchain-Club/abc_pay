@@ -49,6 +49,8 @@ model User {
   merchant     Merchant?
   kycProfile   KycProfile?
   payments     Payment[]
+  kycVerified  Boolean      @default(false)
+  kycVerifiedAt DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
@@ -135,3 +137,73 @@ model KycProfile {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
+
+model KycVerification {
+  id              String   @id @default(uuid())
+  userId          String
+  sessionId       String   @unique
+  status          String
+  vendorData      String?
+  decisionPayload Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model ProcessedWebhookEvent {
+  eventId     String   @id
+  processedAt DateTime @default(now())
+}
+
+model Settlement {
+  id            String    @id @default(uuid())
+  merchantId    String
+  amount        Decimal   @db.Decimal(18, 2)
+  currency      String    @default("ZAR")
+  status        String    @default("pending")
+  bankReference String?
+  createdAt     DateTime  @default(now())
+  settledAt     DateTime?
+
+  @@index([merchantId])
+  @@index([status])
+}
+
+model ReconciliationRun {
+  id               String                     @id @default(uuid())
+  runAt            DateTime                   @default(now())
+  windowStart      DateTime
+  windowEnd        DateTime
+  ledgerTotal      Decimal                    @db.Decimal(36, 18)
+  onChainTotal     Decimal                    @db.Decimal(36, 18)
+  discrepancyTotal Decimal                    @db.Decimal(36, 18)
+  status           String
+  discrepancies    ReconciliationDiscrepancy[]
+}
+
+model ReconciliationDiscrepancy {
+  id                String            @id @default(uuid())
+  runId             String
+  run               ReconciliationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  ledgerEntryId     String?
+  custodyTransferId String?
+  type              String            // amount_mismatch | ledger_orphan | onchain_orphan
+  delta             Decimal           @db.Decimal(36, 18)
+  createdAt         DateTime          @default(now())
+
+  @@index([runId])
+}
+
+model CustodyTransfer {
+  id        String   @id @default(uuid())
+  txHash    String?  @unique
+  reference String?
+  asset     String   @default("USDC")
+  amount    Decimal  @db.Decimal(36, 18)
+  status    String   @default("CONFIRMED")
+  createdAt DateTime @default(now())
+
+  @@index([reference])
+}
+

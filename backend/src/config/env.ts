@@ -6,4 +6,9 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET ?? "dev-only-change-me",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   isProduction: process.env.NODE_ENV === "production",
+  diditApiKey: process.env.DIDIT_API_KEY ?? "",
+  diditWorkflowId: process.env.DIDIT_WORKFLOW_ID ?? "",
+  diditWebhookSecret: process.env.DIDIT_WEBHOOK_SECRET ?? "",
+  reconciliationThreshold: parseFloat(process.env.RECONCILIATION_THRESHOLD ?? "0.01"),
 };
+
