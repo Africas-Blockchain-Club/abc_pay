@@ -5,7 +5,7 @@ export class LunoClient implements ExchangeProvider {
     throw new Error("Luno integration not configured yet");
   }
 
-  async convert(_input: { fromAsset: string; toAsset: string; amount: string }): Promise<{ providerReference: string }> {
+  async convert(_input: { fromAsset: string; toAsset: string; amount: string }) {
     throw new Error("Luno integration not configured yet");
   }
 }
