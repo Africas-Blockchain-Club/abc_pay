@@ -1,17 +1,14 @@
-# ABC Pay MVP
+ABC Pay MVP
 
 ABC Pay is a web-based payment MVP designed to support crypto and stablecoin payments while allowing merchants to ultimately receive fiat settlement.
 
-The project originally started as a standard Next.js application bootstrapped with `create-next-app`, but the architecture has since been updated to separate the frontend from the backend.
+The project originally started as a standard Next.js application, but the architecture has been updated to separate the frontend from the backend.
 
-## Architecture
+Architecture
 
-The project now follows this structure:
-
-```text
 abc_pay/
 ├── frontend/
-│   └── Next.js + TypeScript
+│   └── Next.js + React + TypeScript
 │
 ├── backend/
 │   └── Node.js + Express + TypeScript
@@ -19,49 +16,53 @@ abc_pay/
 ├── docker-compose.yml
 ├── package.json
 └── README.md
-```
 
-The application flow is:
+Application flow:
 
-```text
 User
  ↓
 Next.js Frontend
  ↓
 Express Backend API
  ↓
-Database / Blockchain / External APIs
-```
+PostgreSQL / Blockchain / External APIs
 
 The frontend does not communicate directly with blockchain providers, exchanges, KYC providers, banking services, or other external services.
 
 All external integrations are handled through the backend.
 
----
-
-## Frontend
+Frontend
 
 The frontend uses:
 
-* Next.js
-* React
-* TypeScript
+Next.js
+
+React
+
+TypeScript
 
 The frontend is responsible for:
 
-* Registration
-* Login
-* Wallet UI
-* QR scanning
-* Payment approval
-* Payment history
-* Receipts
-* Merchant QR generation
-* Communicating with the backend API
+Registration
 
-Example frontend routes include:
+Login
 
-```text
+Wallet UI
+
+QR scanning
+
+Payment approval
+
+Payment history
+
+Receipts
+
+Merchant QR generation
+
+Communicating with the backend API
+
+Example routes:
+
 /register
 /login
 /wallet
@@ -70,55 +71,63 @@ Example frontend routes include:
 /approve/[id]
 /receipt/[id]
 /merchant/qr-generate
-```
 
----
+Backend
 
-## Backend
+The backend uses:
 
-A dedicated backend has been added using:
+Node.js
 
-* Node.js
-* Express
-* TypeScript
-* Prisma
-* PostgreSQL
+Express
+
+TypeScript
+
+Prisma
+
+PostgreSQL
 
 The backend is responsible for:
 
-* Authentication
-* User registration
-* Login
-* Logout
-* User sessions
-* Wallet management
-* Payments
-* Quotes
-* Ledger management
-* KYC
-* Custody
-* Crypto-to-fiat conversion
-* Settlement
-* Reconciliation
-* Blockchain interaction
-* External API integrations
+Authentication
+
+User registration
+
+Login and logout
+
+User sessions
+
+Wallet management
+
+Payments
+
+Quotes
+
+Ledger management
+
+KYC
+
+Custody
+
+Crypto-to-fiat conversion
+
+Settlement
+
+Reconciliation
+
+Blockchain interaction
+
+External API integrations
 
 The backend is intentionally separated from Next.js so that payment, blockchain, database, and financial logic remain isolated from the frontend.
 
----
+Authentication
 
-## Authentication Changes
+Available authentication routes:
 
-Authentication functionality has been added to the backend.
-
-Available authentication flows include:
-
-```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
-```
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/logout
+GET  /api/v1/auth/me
 
 Passwords are hashed before being stored.
 
@@ -126,324 +135,283 @@ Authentication sessions use JWT tokens stored in HTTP-only cookies.
 
 Protected endpoints require a valid authenticated session.
 
----
+When a user registers successfully, a wallet is automatically created and linked to that user.
 
-## User Registration
-
-Registration now creates a user account in the backend.
-
-A user contains information such as:
-
-```text
-id
-name
-email
-passwordHash
-createdAt
-updatedAt
-```
-
-When a new user successfully registers, a wallet is automatically created and linked to that user.
-
----
-
-## Wallet Model
-
-A wallet model has been added to represent the user's wallet inside the platform.
-
-The relationship is:
-
-```text
-User
-  ↓
 Wallet
-```
 
-A wallet can contain information such as:
+The authenticated user's wallet can be retrieved through:
 
-```text
-walletId
-userId
-walletAddress
-currency
-balance
-createdAt
-updatedAt
-```
+GET /api/v1/wallets/me
 
-The authenticated user's wallet can be retrieved through a protected endpoint such as:
+The wallet abstraction will later support blockchain addresses, balances, custody, transactions, and supported assets without requiring the frontend to interact directly with blockchain infrastructure.
 
-```text
-GET /api/wallets/me
-```
-
-The wallet abstraction will later allow the platform to manage blockchain addresses, balances, custody, transactions, and supported assets without requiring the frontend to interact directly with blockchain infrastructure.
-
----
-
-## Database Models
+Database Models
 
 Prisma is used as the backend ORM.
 
-The current MVP database structure includes models for:
+Current MVP models include:
 
-* User
-* Wallet
-* Merchant
-* Payment
-* Quote
-* LedgerEntry
-* KycProfile
+User
 
-These models live in:
+Wallet
 
-```text
+Merchant
+
+Payment
+
+Quote
+
+LedgerEntry
+
+KycProfile
+
+Models are defined in:
+
 backend/prisma/schema.prisma
-```
 
-Unlike a Mongoose-based application, Prisma models are defined inside the Prisma schema instead of separate files such as:
+External API Architecture
 
-```text
-models/User.ts
-models/Wallet.ts
-```
+External services are accessed only through the backend.
 
----
+Frontend
+   ↓
+Express Backend
+   ↓
+Integration Service
+   ↓
+External Provider
 
-## External API Architecture
+Planned integration categories include:
 
-The backend also contains integration boundaries for external providers.
-
-These may include:
-
-```text
 backend/src/integrations/
 ├── exchanges/
 ├── blockchain/
 ├── kyc/
 └── banking/
-```
 
-Future providers may include:
+Potential providers include:
 
-* VALR
-* Luno
-* Blockchain RPC providers
-* KYC / identity verification providers
-* Banking APIs
-* Payout providers
-* Pricing APIs
-* Notification providers
+VALR
 
-The architecture follows this pattern:
+Luno
 
-```text
-Frontend
-   ↓
-Our Backend
-   ↓
-External Provider
-```
+Blockchain RPC providers
 
-For example:
+KYC / identity verification providers
 
-```text
-Next.js
-   ↓
-Express API
-   ↓
-Conversion Service
-   ↓
-VALR / Luno
-```
+Banking and payout providers
 
-API credentials and sensitive provider information remain exclusively on the backend.
+Pricing APIs
 
----
+Notification providers
 
-## Backend Testing
+API keys and provider credentials must remain on the backend and must never be exposed to the frontend.
 
-Backend tests have been added using:
+Backend Testing
 
-* Vitest
-* Supertest
+Backend tests use:
 
-The initial API test suite covers:
+Vitest
 
-* API health
-* Successful registration
-* Invalid registration
-* Duplicate registration
-* Successful login
-* Incorrect password rejection
-* Authenticated user lookup
-* Protected wallet access
+Supertest
 
-Tests are stored under:
+The current test suite covers:
 
-```text
+API health
+
+Successful registration
+
+Invalid registration
+
+Duplicate registration
+
+Successful login
+
+Incorrect password rejection
+
+Authenticated user lookup
+
+Protected wallet access
+
+Tests are located in:
+
 backend/tests/
-```
 
-The tests use an in-memory application store where appropriate so that basic API tests do not require a running PostgreSQL database.
+Run tests with:
 
-Run backend tests with:
-
-```bash
 cd backend
 npm test
-```
 
----
+Local Development
 
-## Getting Started
-
-### Install dependencies
+1. Install Dependencies
 
 From the project root:
 
-```bash
 npm install
-```
 
-You may also install frontend and backend dependencies individually:
+Or install each application separately:
 
-```bash
 cd frontend
 npm install
-```
 
-and:
-
-```bash
 cd backend
 npm install
-```
 
----
+2. Start PostgreSQL
 
-## Start the Frontend
+From the project root:
 
-Navigate to the frontend:
+docker compose up -d postgres
 
-```bash
-cd frontend
-```
+The default development database configuration is:
 
-Run the development server:
+Database: abc_pay
+User: abc_pay
+Password: abc_pay
+Port: 5432
 
-```bash
-npm run dev
-```
+3. Configure Backend Environment
 
-Or:
+Inside backend/:
 
-```bash
-yarn dev
-```
+cp .env.example .env
 
-```bash
-pnpm dev
-```
+Example backend/.env:
 
-```bash
-bun dev
-```
+PORT=4000
 
-Open:
+DATABASE_URL=postgresql://abc_pay:abc_pay@localhost:5432/abc_pay?schema=public
 
-```text
-http://localhost:3000
-```
+JWT_SECRET=replace-this-with-a-long-random-secret
 
-with your browser.
-
-The page automatically updates as frontend files are edited.
-
----
-
-## Start the Backend
-
-Navigate to:
-
-```bash
-cd backend
-```
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-The backend runs separately from the Next.js frontend and exposes the application's REST API.
-
----
-
-## Database
-
-The backend uses PostgreSQL with Prisma.
-
-A database connection string should be configured in the backend `.env` file.
-
-Example:
-
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/abc_pay"
-```
-
-Generate the Prisma client:
-
-```bash
-npx prisma generate
-```
-
-Run migrations:
-
-```bash
-npx prisma migrate dev
-```
-
-You can inspect the database using:
-
-```bash
-npx prisma studio
-```
-
----
-
-## Environment Variables
-
-Sensitive credentials should never be committed to Git.
-
-Example backend environment variables:
-
-```env
-DATABASE_URL=
-JWT_SECRET=
 FRONTEND_URL=http://localhost:3000
+
+If Next.js starts on port 3001, either update FRONTEND_URL or configure CORS to allow both development origins.
+
+Sensitive credentials must never be committed to Git.
+
+Future environment variables may include:
 
 VALR_API_KEY=
 VALR_API_SECRET=
-
 LUNO_API_KEY=
-
 BLOCKCHAIN_RPC_URL=
-
 KYC_API_KEY=
-
 BANKING_API_KEY=
-```
 
-Create a local `.env` file and ensure it is included in `.gitignore`.
+4. Initialize Prisma
 
----
+From backend/:
 
-## Current MVP Payment Direction
+npx prisma generate
+npx prisma migrate dev --name init
 
-The intended payment architecture is:
+To inspect the database:
 
-```text
+npx prisma studio
+
+5. Run the Backend
+
+From backend/:
+
+npm run dev
+
+Development backend:
+
+http://localhost:4000
+
+For a production-style run:
+
+npm run build
+npm start
+
+npm start runs the compiled file:
+
+dist/server.js
+
+6. Run the Frontend
+
+Open another terminal:
+
+cd frontend
+npm run dev
+
+Frontend:
+
+http://localhost:3000
+
+If port 3000 is already occupied, Next.js may start on:
+
+http://localhost:3001
+
+CORS
+
+The backend must allow the origin used by the frontend.
+
+For local development, the backend may allow both:
+
+http://localhost:3000
+http://localhost:3001
+
+The frontend should communicate only with the backend:
+
+Next.js Frontend
+        ↓
+Express Backend
+        ↓
+PostgreSQL / Blockchain / External APIs
+
+Frontend requests that use cookie-based authentication must include credentials.
+
+Example:
+
+fetch("http://localhost:4000/api/v1/auth/register", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  credentials: "include",
+  body: JSON.stringify(data),
+});
+
+Common Development Issues
+
+DATABASE_URL not found
+
+If Prisma reports:
+
+Environment variable not found: DATABASE_URL
+
+make sure this file exists:
+
+backend/.env
+
+and contains:
+
+DATABASE_URL=postgresql://abc_pay:abc_pay@localhost:5432/abc_pay?schema=public
+
+Restart the backend after changing environment variables.
+
+CORS origin mismatch
+
+If the frontend runs on http://localhost:3001 while the backend only allows http://localhost:3000, browser requests will be blocked.
+
+Update the backend CORS configuration or the FRONTEND_URL environment variable.
+
+dist/server.js not found
+
+If npm start fails because dist/server.js does not exist, compile the TypeScript backend first:
+
+npm run build
+npm start
+
+During development, use:
+
+npm run dev
+
+Current MVP Payment Direction
+
 Customer scans merchant QR
         ↓
 Frontend requests payment quote
@@ -469,41 +437,29 @@ Ledger updated
 Settlement service
         ↓
 Merchant receives ZAR
-```
 
 Some parts of this flow are currently architecture placeholders and will be implemented incrementally as the MVP develops.
 
----
+Deployment
 
-## Learn More
+The frontend can be deployed separately from the backend.
 
-To learn more about Next.js:
+A future production environment will require:
 
-* Next.js Documentation
-* Learn Next.js
-* Next.js GitHub repository
+Next.js frontend hosting
 
-To learn more about the backend technologies:
+Node.js backend hosting
 
-* Node.js Documentation
-* Express Documentation
-* Prisma Documentation
-* PostgreSQL Documentation
-* Vitest Documentation
-* Supertest Documentation
+PostgreSQL
 
----
+Blockchain RPC access
 
-## Deployment
+Exchange API access
 
-The frontend can eventually be deployed using platforms such as Vercel.
+KYC integration
 
-The backend should be deployed separately as a Node.js service with access to:
+Banking / settlement integration
 
-* PostgreSQL
-* blockchain RPC providers
-* external exchange APIs
-* KYC providers
-* banking / settlement providers
+Secure secret management
 
-Production deployment architecture will be defined as the MVP matures.
+Production infrastructure will be defined as the MVP matures.
