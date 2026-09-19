@@ -12,8 +12,21 @@
  * "never reuse an index" guarantee is enforced in exactly one place.
  */
 
-import { Prisma, PrismaClient, ChainNetwork } from "@prisma/client";
+import { Prisma, PrismaClient, ChainNetwork } from "../../generated/prisma";
 import { allocateDepositAddress, verifyStoredAddress } from "./wallet";
+
+/**
+ * Type guard for Prisma's known-request errors (e.g. unique constraint
+ * violations, P2002). Narrows `unknown` caught errors explicitly rather
+ * than relying on `instanceof` alone reading cleanly in every editor/TS
+ * version — this keeps `err.code` / `err.meta` accesses unambiguously
+ * typed everywhere below.
+ */
+function isPrismaKnownRequestError(
+  err: unknown,
+): err is Prisma.PrismaClientKnownRequestError {
+  return err instanceof Prisma.PrismaClientKnownRequestError;
+}
 
 export class DepositAllocationError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
@@ -78,7 +91,7 @@ export async function allocateNewDepositAddress(
 
   try {
     return await prisma.$transaction(
-      async (tx) => {
+      async (tx: Prisma.TransactionClient) => {
         // Lock the single counter row for the duration of this
         // transaction. Any concurrent call to this function blocks here
         // until this transaction commits or rolls back.
@@ -133,15 +146,18 @@ export async function allocateNewDepositAddress(
         // Serializable isolation as defense-in-depth on top of the row
         // lock — belt and braces for the piece of the system where a
         // mistake means money going to an address nobody can recover.
-        isolation: Prisma.TransactionIsolationLevel.Serializable,
+        // NOTE: the option is `isolationLevel`, not `isolation` — this
+        // is the actual property name in this project's installed
+        // Prisma client, per its own generated overload signature.
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
       },
     );
-  } catch (err) {
+  } catch (err: unknown) {
     // Unique constraint race: two requests both passed the pre-check
     // above before either committed. Treat as idempotent success rather
     // than surfacing a 500 to the caller.
     if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
+      isPrismaKnownRequestError(err) &&
       err.code === "P2002" &&
       err.meta?.target &&
       String(err.meta.target).includes("invoiceId")
