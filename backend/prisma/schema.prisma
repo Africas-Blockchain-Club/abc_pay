@@ -7,11 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// enum UserRole {
-//   USER
-//   MERCHANT
-//   ADMIN
-// }
+enum UserRole {
+  USER
+  MERCHANT
+  ADMIN
+}
 
 enum KycStatus {
   NOT_STARTED
@@ -40,35 +40,35 @@ enum KycStatus {
 // }
 
 model User {
-  id           String       @id @default(uuid())
-  name         String
-  surname      String
-  email        String       @unique
-  phoneNumber   String       @unique
-  walletAddress String       @unique
-  kycStatus    KycStatus    @default(NOT_STARTED)
+  id            String    @id @default(uuid())
+  name          String
+  surname       String
+  email         String    @unique
+  phoneNumber   String    @unique
+  walletAddress String    @unique
+  role          String
+  kycStatus     KycStatus @default(NOT_STARTED)
+  createdAt     DateTime
 
+  wallet        Wallet 
 }
 
-// model Wallet {
-//   id            String        @id @default(uuid())
-//   userId        String        @unique
-//   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   publicAddress String?       @unique
-//   chain         String        @default("EVM")
-//   stablecoin    String        @default("USDC")
-//   balanceCached Decimal       @default(0) @db.Decimal(36, 18)
-//   payments      Payment[]
-//   ledgerEntries LedgerEntry[]
-//   createdAt     DateTime      @default(now())
-//   updatedAt     DateTime      @updatedAt
-// }
+model Wallet {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  publicAddress String?  @unique
+  chain         String   @default("EVM")
+  stablecoin    String   @default("USDC")
+  user          User     @relation(fields: [userId], references: [id])
+  balanceCached Decimal  @default(0) @db.Decimal(36, 18)
+  createdAt     DateTime @default(now())
+}
 
 model Merchant {
-  id               String    @id @default(uuid())
-  businessName     String
-  taxNumber        String
-  businessRegistration  String
+  id                   String @id @default(uuid())
+  businessName         String
+  taxNumber            String
+  businessRegistration String
 }
 
 // model Payment {

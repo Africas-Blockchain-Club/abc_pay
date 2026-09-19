@@ -1,5 +1,4 @@
 import { Router, type Response } from "express";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
 import type { AppStore } from "../types/store.js";
 import { signAuthToken } from "../lib/auth.js";
@@ -8,14 +7,12 @@ import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.middl
 
 const registerSchema = z.object({
   name: z.string().trim().min(2).max(80),
+  surname: z.string().trim().min(2).max(80), 
   email: z.email().transform((value) => value.toLowerCase()),
-  password: z.string().min(8).max(128),
+  phoneNumber: z.string().trim().min(10).max(10)
 });
 
-const loginSchema = z.object({
-  email: z.email().transform((value) => value.toLowerCase()),
-  password: z.string().min(1),
-});
+// Users do not need to login: their wallets will perform auth
 
 function publicUser(user: { id: string; name: string; email: string; role: string; createdAt: Date }) {
   return { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt };
@@ -41,11 +38,10 @@ export function createAuthRouter(store: AppStore) {
       const existing = await store.findUserByEmail(parsed.data.email);
       if (existing) return res.status(409).json({ message: "An account with this email already exists" });
 
-      const passwordHash = await bcrypt.hash(parsed.data.password, 12);
       const { user, wallet } = await store.createUserWithWallet({
         name: parsed.data.name,
-        email: parsed.data.email,
-        passwordHash,
+        surname: parsed.data.surname,
+        email: parsed.data.email
       });
 
       const token = signAuthToken({ sub: user.id, email: user.email, role: user.role });
@@ -56,23 +52,7 @@ export function createAuthRouter(store: AppStore) {
     }
   });
 
-  router.post("/login", async (req, res, next) => {
-    try {
-      const parsed = loginSchema.safeParse(req.body);
-      if (!parsed.success) return res.status(400).json({ message: "Invalid login details" });
-
-      const user = await store.findUserByEmail(parsed.data.email);
-      if (!user || !(await bcrypt.compare(parsed.data.password, user.passwordHash))) {
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
-
-      const token = signAuthToken({ sub: user.id, email: user.email, role: user.role });
-      setSession(res, token);
-      return res.json({ user: publicUser(user) });
-    } catch (error) {
-      next(error);
-    }
-  });
+  // We no longer need to login as a user
 
   router.post("/logout", (_req, res) => {
     res.clearCookie("abc_pay_session");

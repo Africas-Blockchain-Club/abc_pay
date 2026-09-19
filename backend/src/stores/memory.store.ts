@@ -18,8 +18,8 @@ export class MemoryStore implements AppStore {
     const user: UserRecord = {
       id: randomUUID(),
       name: input.name,
+      surname: input.surname,
       email: input.email.toLowerCase(),
-      passwordHash: input.passwordHash,
       role: "USER",
       createdAt: now,
     };

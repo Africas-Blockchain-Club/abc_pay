@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import type { AppStore, CreateUserInput, UserRecord, WalletRecord } from "../types/store.js";
 
-function mapUser(user: { id: string; name: string; email: string; passwordHash: string; role: string; createdAt: Date }): UserRecord {
+function mapUser(user: { id: string; name: string; surname: string; email: string; role: string; createdAt: Date }): UserRecord {
   return { ...user, role: user.role as UserRecord["role"] };
 }
 
@@ -26,7 +26,6 @@ export class PrismaStore implements AppStore {
         data: {
           ...input,
           wallet: { create: {} },
-          kycProfile: { create: {} },
         },
         include: { wallet: true },
       });

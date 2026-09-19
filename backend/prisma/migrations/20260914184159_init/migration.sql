@@ -1,5 +1,5 @@
 -- -- CreateEnum
--- CREATE TYPE "UserRole" AS ENUM ('USER', 'MERCHANT', 'ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('USER', 'MERCHANT', 'ADMIN');
 
 -- CreateEnum
 CREATE TYPE "KycStatus" AS ENUM ('NOT_STARTED', 'PENDING', 'VERIFIED', 'REJECTED');

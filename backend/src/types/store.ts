@@ -1,8 +1,8 @@
 export type UserRecord = {
   id: string;
   name: string;
+  surname: string;
   email: string;
-  passwordHash: string;
   role: "USER" | "MERCHANT" | "ADMIN";
   createdAt: Date;
 };
@@ -19,8 +19,9 @@ export type WalletRecord = {
 
 export type CreateUserInput = {
   name: string;
+  surname: string;
   email: string;
-  passwordHash: string;
+  wallet: WalletRecord
 };
 
 export interface AppStore {
