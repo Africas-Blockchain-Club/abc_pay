@@ -7,11 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  USER
-  MERCHANT
-  ADMIN
-}
+// enum UserRole {
+//   USER
+//   MERCHANT
+//   ADMIN
+// }
 
 enum KycStatus {
   NOT_STARTED
@@ -20,118 +20,110 @@ enum KycStatus {
   REJECTED
 }
 
-enum PaymentStatus {
-  CREATED
-  QUOTED
-  AWAITING_PAYMENT
-  CONFIRMING
-  CONVERTING
-  SETTLING
-  COMPLETED
-  FAILED
-  CANCELLED
-}
+// enum PaymentStatus {
+//   CREATED
+//   QUOTED
+//   AWAITING_PAYMENT
+//   CONFIRMING
+//   CONVERTING
+//   SETTLING
+//   COMPLETED
+//   FAILED
+//   CANCELLED
+// }
 
-enum LedgerEntryType {
-  CREDIT
-  DEBIT
-  FEE
-  SETTLEMENT
-}
+// enum LedgerEntryType {
+//   CREDIT
+//   DEBIT
+//   FEE
+//   SETTLEMENT
+// }
 
 model User {
   id           String       @id @default(uuid())
   name         String
+  surname      String
   email        String       @unique
-  passwordHash String
-  role         UserRole     @default(USER)
-  wallet       Wallet?
-  merchant     Merchant?
-  kycProfile   KycProfile?
-  payments     Payment[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  phoneNumber   String       @unique
+  walletAddress String       @unique
+  kycStatus    KycStatus    @default(NOT_STARTED)
+
 }
 
-model Wallet {
-  id            String        @id @default(uuid())
-  userId        String        @unique
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  publicAddress String?       @unique
-  chain         String        @default("EVM")
-  stablecoin    String        @default("USDC")
-  balanceCached Decimal       @default(0) @db.Decimal(36, 18)
-  payments      Payment[]
-  ledgerEntries LedgerEntry[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-}
+// model Wallet {
+//   id            String        @id @default(uuid())
+//   userId        String        @unique
+//   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   publicAddress String?       @unique
+//   chain         String        @default("EVM")
+//   stablecoin    String        @default("USDC")
+//   balanceCached Decimal       @default(0) @db.Decimal(36, 18)
+//   payments      Payment[]
+//   ledgerEntries LedgerEntry[]
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+// }
 
 model Merchant {
   id               String    @id @default(uuid())
-  ownerId          String    @unique
-  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   businessName     String
-  settlementMethod String?   
-  settlementRef    String?
-  payments         Payment[]
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  taxNumber        String
+  businessRegistration  String
 }
 
-model Payment {
-  id             String         @id @default(uuid())
-  userId         String
-  user           User           @relation(fields: [userId], references: [id])
-  walletId       String?
-  wallet         Wallet?        @relation(fields: [walletId], references: [id])
-  merchantId     String?
-  merchant       Merchant?      @relation(fields: [merchantId], references: [id])
-  amountZar      Decimal        @db.Decimal(18, 2)
-  cryptoAmount   Decimal?       @db.Decimal(36, 18)
-  cryptoAsset    String         @default("USDC")
-  feeZar         Decimal        @default(0) @db.Decimal(18, 2)
-  merchantNetZar Decimal?       @db.Decimal(18, 2)
-  txHash         String?        @unique
-  status         PaymentStatus  @default(CREATED)
-  quotes         Quote[]
-  ledgerEntries  LedgerEntry[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-}
+// model Payment {
+//   id             String         @id @default(uuid())
+//   userId         String
+//   user           User           @relation(fields: [userId], references: [id])
+//   walletId       String?
+//   wallet         Wallet?        @relation(fields: [walletId], references: [id])
+//   merchantId     String?
+//   merchant       Merchant?      @relation(fields: [merchantId], references: [id])
+//   amountZar      Decimal        @db.Decimal(18, 2)
+//   cryptoAmount   Decimal?       @db.Decimal(36, 18)
+//   cryptoAsset    String         @default("USDC")
+//   feeZar         Decimal        @default(0) @db.Decimal(18, 2)
+//   merchantNetZar Decimal?       @db.Decimal(18, 2)
+//   txHash         String?        @unique
+//   status         PaymentStatus  @default(CREATED)
+//   quotes         Quote[]
+//   ledgerEntries  LedgerEntry[]
+//   createdAt      DateTime       @default(now())
+//   updatedAt      DateTime       @updatedAt
+// }
 
-model Quote {
-  id           String   @id @default(uuid())
-  paymentId    String
-  payment      Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  provider     String
-  pair         String
-  rate         Decimal  @db.Decimal(36, 18)
-  cryptoAmount Decimal  @db.Decimal(36, 18)
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-}
+// model Quote {
+//   id           String   @id @default(uuid())
+//   paymentId    String
+//   payment      Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+//   provider     String
+//   pair         String
+//   rate         Decimal  @db.Decimal(36, 18)
+//   cryptoAmount Decimal  @db.Decimal(36, 18)
+//   expiresAt    DateTime
+//   createdAt    DateTime @default(now())
+// }
 
-model LedgerEntry {
-  id        String          @id @default(uuid())
-  walletId  String?
-  wallet    Wallet?         @relation(fields: [walletId], references: [id])
-  paymentId String?
-  payment   Payment?        @relation(fields: [paymentId], references: [id])
-  type      LedgerEntryType
-  asset     String
-  amount    Decimal         @db.Decimal(36, 18)
-  reference String?
-  createdAt DateTime        @default(now())
-}
+// model LedgerEntry {
+//   id        String          @id @default(uuid())
+//   walletId  String?
+//   wallet    Wallet?         @relation(fields: [walletId], references: [id])
+//   paymentId String?
+//   payment   Payment?        @relation(fields: [paymentId], references: [id])
+//   type      LedgerEntryType
+//   asset     String
+//   amount    Decimal         @db.Decimal(36, 18)
+//   reference String?
+//   createdAt DateTime        @default(now())
+// }
 
-model KycProfile {
-  id          String    @id @default(uuid())
-  userId      String    @unique
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status      KycStatus @default(NOT_STARTED)
-  provider    String?
-  providerRef String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
+// model KycProfile {
+//   id          String    @id @default(uuid())
+//   userId      String    @unique
+//   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   status      KycStatus @default(NOT_STARTED)
+//   provider    String?
+//   providerRef String?
+//   createdAt   DateTime  @default(now())
+//   updatedAt   DateTime  @updatedAt
+// }
