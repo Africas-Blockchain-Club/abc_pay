@@ -1,1 +1,93 @@
-#DB schema and users
+// prisma/schema.prisma
+//
+// ABC Pay — Prisma schema (Prisma ORM v7)
+//
+// NOTE FOR THE TEAM: this file currently only contains the
+// CUSTODY models (owned by Custody/Blockchain dev). Backend/Payment
+// Core, Identity/Settlement, and Frontend devs — add your own models
+// below the custody section. Coordinate in team chat before editing
+// this file, since it's shared (see README "Shared files" section).
+
+generator client {
+  provider = "prisma-client-js"
+  // Prisma 7 requires an explicit output path — there is no default
+  // location anymore. Import the client from this path everywhere,
+  // e.g.: import { PrismaClient } from "../generated/prisma"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// CUSTODY MODELS — owned by Custody/Blockchain dev
+
+// Tracks the HD derivation index counter. Single-row table (id always 1)
+// used as an atomic counter so two concurrent requests can never be
+// handed the same derivation index / address.
+model CustodyCounter {
+  id        Int      @id @default(1)
+  nextIndex Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+// One row per deposit address ever issued. Addresses are never reused —
+// derivationIndex has a hard unique constraint enforcing that at the DB
+// level, independent of application logic.
+model DepositAddress {
+  id              String       @id @default(cuid())
+  invoiceId       String       @unique
+  address         String       @unique
+  derivationIndex Int          @unique
+  derivationPath  String
+  network         ChainNetwork
+  createdAt       DateTime     @default(now())
+
+  transactions ChainTransaction[]
+
+  @@index([address])
+}
+
+// One row per on-chain transfer observed to a DepositAddress.
+// A single invoice could theoretically receive multiple transfers
+// (underpay + top-up, etc.) so this is a one-to-many off DepositAddress.
+model ChainTransaction {
+  id               String         @id @default(cuid())
+  depositAddressId String
+  depositAddress   DepositAddress @relation(fields: [depositAddressId], references: [id])
+
+  txHash       String  @unique
+  network      ChainNetwork
+  fromAddress  String
+  amount       Decimal @db.Decimal(36, 18) // token base units, precise enough for 18-decimal ERC20s
+  tokenAddress String? // null = native asset (ETH/MATIC); set = ERC20 contract address
+  tokenSymbol  String
+
+  status                ChainTransactionStatus @default(PENDING)
+  confirmations         Int                    @default(0)
+  requiredConfirmations Int                    @default(12)
+
+  detectedAt  DateTime  @default(now())
+  confirmedAt DateTime?
+
+  // Set once this deposit has been picked up by the batch conversion
+  // worker — prevents double-processing the same confirmed deposit.
+  batchId String?
+
+  @@index([status])
+  @@index([depositAddressId])
+}
+
+enum ChainNetwork {
+  BASE
+  POLYGON
+}
+
+enum ChainTransactionStatus {
+  PENDING // seen in mempool / below confirmation threshold
+  CONFIRMED // reached requiredConfirmations, ready for conversion
+  CONVERTING // picked up by batch worker, conversion in progress
+  CONVERTED // successfully converted via VALR/Luno
+  FAILED // reorg'd out, or conversion failed
+}
