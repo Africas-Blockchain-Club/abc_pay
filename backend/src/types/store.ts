@@ -21,7 +21,6 @@ export type CreateUserInput = {
   name: string;
   surname: string;
   email: string;
-  wallet: WalletRecord
 };
 
 export interface AppStore {
