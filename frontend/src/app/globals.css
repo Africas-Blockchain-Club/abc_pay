@@ -77,4 +77,165 @@ button, input { font: inherit; }
   .main { padding: 22px 16px; }
 }
 
+/* ── Modal (orange / white / black — landing page style) ──────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding-top: 80px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  position: relative;
+  width: min(400px, calc(100% - 32px));
+  background: #ffffff;
+  border: 1px solid #e2e6ed;
+  border-radius: 20px;
+  padding: 28px;
+  animation: slideUp 0.25s ease;
+  color: #0f1f3d;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modalClose {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #6b7a95;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modalClose:hover {
+  color: #0f1f3d;
+}
+
+.modalHeader {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.modalHeader .eyebrow {
+  color: #e85d04;
+}
+
+.modalHeader h2 {
+  font-size: 1.4rem;
+  letter-spacing: -.03em;
+  color: #0f1f3d;
+}
+
+.modalBody {
+  display: grid;
+  gap: 12px;
+}
+
+.typeOptions {
+  display: grid;
+  gap: 10px;
+}
+
+.signInOption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  background: #f7f8fa;
+  border: 1px solid #e2e6ed;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #0f1f3d;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.signInOption:hover {
+  border-color: #e85d04;
+  background: #fff9f5;
+}
+
+.signInOption:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.optionIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.optionText {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  text-align: left;
+}
+
+.optionTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f1f3d;
+}
+
+.optionDesc {
+  color: #6b7a95;
+  font-size: 0.82rem;
+}
+
+.modalError {
+  margin-top: 4px;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+/* ── Dashboard cards ────────────────────────────────────────────── */
+.statCard {
+  border-color: #e85d04;
+  background: #ffffff;
+}
+
+.statLabel {
+  color: #6b7a95;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.stat {
+  color: #0f1f3d;
+}
+
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #f7f8fa;
+  border: 1px solid #e2e6ed;
+  padding: 12px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  color: #0f1f3d;
+}
+
 }
