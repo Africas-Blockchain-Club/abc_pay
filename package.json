@@ -1,7 +1,10 @@
 {
   "name": "abc-pay-mvp",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "concurrently -n frontend,backend \"npm run dev -w frontend\" \"npm run dev -w backend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
@@ -9,6 +12,11 @@
     "lint": "npm run lint -w frontend && npm run typecheck -w backend"
   },
   "devDependencies": {
+    "@types/swagger-ui-express": "^4.1.8",
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "swagger-ui-express": "^5.0.1"
   }
 }

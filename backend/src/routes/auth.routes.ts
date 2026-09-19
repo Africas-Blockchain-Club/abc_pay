@@ -1,21 +1,32 @@
 import { Router, type Response } from "express";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
-import type { AppStore } from "../types/store.js";
+import type { AppStore, UserRecord } from "../types/store.js";
 import { signAuthToken } from "../lib/auth.js";
 import { env } from "../config/env.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  surname: z.string().trim().min(2).max(80), 
-  email: z.email().transform((value) => value.toLowerCase()),
-  phoneNumber: z.string().trim().min(10).max(10)
+  surname: z.string().trim().min(2).max(80),
+  email: z.string().email().toLowerCase(),
+  phoneNumber: z.string().trim().min(10).max(10),
+  walletAddress: z.string().trim()
 });
 
-// Users do not need to login: their wallets will perform auth
 
-function publicUser(user: { id: string; name: string; email: string; role: string; createdAt: Date }) {
-  return { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt };
+function publicUser(user: UserRecord) {
+  return {
+    id: user.id,
+    name: user.name,
+    surname: user.surname,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    walletAddress: user.walletAddress,
+    kycStatus: user.kycStatus,
+    role: user.role,
+    createdAt: user.createdAt
+  };
 }
 
 function setSession(res: Response, token: string) {
@@ -23,7 +34,7 @@ function setSession(res: Response, token: string) {
     httpOnly: true,
     secure: env.isProduction,
     sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000
   });
 }
 
@@ -35,24 +46,47 @@ export function createAuthRouter(store: AppStore) {
       const parsed = registerSchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ message: "Invalid registration details", issues: parsed.error.issues });
 
-      const existing = await store.findUserByEmail(parsed.data.email);
-      if (existing) return res.status(409).json({ message: "An account with this email already exists" });
+      const existingEmail = await store.findUserByEmail(parsed.data.email);
+      if (existingEmail) return res.status(409).json({ message: "An account with this email already exists" });
+
+      if (store.findUserByPhoneNumber) {
+        const existingPhone = await store.findUserByPhoneNumber(parsed.data.phoneNumber);
+        if (existingPhone) return res.status(409).json({ message: "An account with this phone number already exists" });
+      }
+
+      if (store.findUserByWalletAddress) {
+        const existingWallet = await store.findUserByWalletAddress(parsed.data.walletAddress);
+        if (existingWallet) return res.status(409).json({ message: "An account with this wallet address already exists" });
+      }
 
       const { user, wallet } = await store.createUserWithWallet({
         name: parsed.data.name,
         surname: parsed.data.surname,
-        email: parsed.data.email
+        email: parsed.data.email,
+        phoneNumber: parsed.data.phoneNumber,
+        walletAddress: parsed.data.walletAddress
       });
 
       const token = signAuthToken({ sub: user.id, email: user.email, role: user.role });
       setSession(res, token);
       return res.status(201).json({ user: publicUser(user), wallet });
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === "P2002") {
+        const target = Array.isArray(error?.meta?.target) ? error.meta.target : [error?.meta?.target];
+        if (target.includes("phoneNumber")) {
+          return res.status(409).json({ message: "An account with this phone number already exists" });
+        }
+        if (target.includes("walletAddress")) {
+          return res.status(409).json({ message: "An account with this wallet address already exists" });
+        }
+        if (target.includes("email")) {
+          return res.status(409).json({ message: "An account with this email already exists" });
+        }
+        return res.status(409).json({ message: "An account with these details already exists" });
+      }
       next(error);
     }
   });
-
-  // We no longer need to login as a user
 
   router.post("/logout", (_req, res) => {
     res.clearCookie("abc_pay_session");

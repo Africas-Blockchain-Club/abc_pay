@@ -50,7 +50,7 @@ model User {
   kycStatus     KycStatus @default(NOT_STARTED)
   createdAt     DateTime
 
-  wallet        Wallet 
+  wallet        Wallet? 
 }
 
 model Wallet {
@@ -59,7 +59,7 @@ model Wallet {
   publicAddress String?  @unique
   chain         String   @default("EVM")
   stablecoin    String   @default("USDC")
-  user          User     @relation(fields: [userId], references: [id])
+  user          User?    @relation(fields: [userId], references: [id])
   balanceCached Decimal  @default(0) @db.Decimal(36, 18)
   createdAt     DateTime @default(now())
 }

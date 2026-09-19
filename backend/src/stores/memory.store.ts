@@ -13,6 +13,18 @@ export class MemoryStore implements AppStore {
     return this.users.get(id) ?? null;
   }
 
+  async findUserByPhoneNumber(phoneNumber: string) {
+    return [...this.users.values()].find((user) => user.phoneNumber === phoneNumber) ?? null;
+  }
+
+  async findUserByWalletAddress(walletAddress: string) {
+    return (
+      [...this.users.values()].find(
+        (user) => user.walletAddress?.toLowerCase() === walletAddress.toLowerCase()
+      ) ?? null
+    );
+  }
+
   async createUserWithWallet(input: CreateUserInput) {
     const now = new Date();
     const user: UserRecord = {
@@ -20,6 +32,9 @@ export class MemoryStore implements AppStore {
       name: input.name,
       surname: input.surname,
       email: input.email.toLowerCase(),
+      phoneNumber: input.phoneNumber,
+      walletAddress: input.walletAddress,
+      kycStatus: "NOT_STARTED",
       role: "USER",
       createdAt: now,
     };
