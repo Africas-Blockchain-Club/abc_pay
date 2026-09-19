@@ -18,7 +18,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
     "walletAddress" TEXT NOT NULL,
-    "kycStatus" "KycStatus" NOT NULL DEFAULT 'NOT_STARTED',
+    "kycStatus" "KycStatus" NOT NULL DEFAULT 'NOT_STARTED'
 
 
     -- CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -43,7 +43,7 @@ CREATE TABLE "Merchant" (
     "id" TEXT NOT NULL,
     "businessName" TEXT NOT NULL,
     "taxNumber" TEXT NOT NULL,
-    "businessRegistration" TEXT NOT NULL,
+    "businessRegistration" TEXT NOT NULL
 
     -- CONSTRAINT "Merchant_pkey" PRIMARY KEY ("id")
 );
