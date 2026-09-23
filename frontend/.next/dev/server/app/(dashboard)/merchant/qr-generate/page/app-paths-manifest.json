@@ -1,0 +1,3 @@
+{
+  "/(dashboard)/merchant/qr-generate/page": "app/(dashboard)/merchant/qr-generate/page.js"
+}

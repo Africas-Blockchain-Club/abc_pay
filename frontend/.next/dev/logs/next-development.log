@@ -1,0 +1,11 @@
+{"timestamp":"00:00:18.856","source":"Server","level":"WARN","message":"⚠ Slow filesystem detected. The benchmark took 324ms. If /home/mbuyiselo-thiya/Documents/abc_pay/frontend/.next/dev is a network drive, consider moving it to a local folder.\nSee more: https://nextjs.org/docs/app/guides/local-development"}
+{"timestamp":"00:00:23.904","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:27.002","source":"Server","level":"LOG","message":"○ Compiling / ..."}
+{"timestamp":"00:01:29.574","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:14:16.869","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"03:08:02.320","source":"Server","level":"LOG","message":"○ Compiling /_not-found/page ..."}
+{"timestamp":"03:12:16.707","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"03:12:19.929","source":"Server","level":"LOG","message":"✓ Finished writing to filesystem cache in 15.0s"}
+{"timestamp":"03:23:21.297","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"03:23:30.678","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"03:30:31.433","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}

@@ -374,7 +374,8 @@ function Nav() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/frontend/register" className="text-sm font-medium hover:opacity-60 transition-opacity" style={{ color: C.navy }}>Sign in</Link>
+          <Link href="/sign-in" className="text-sm font-medium hover:opacity-60 transition-opacity" style={{ color: C.navy }}>Sign in</Link>
+          <Link href="/register" className="px-4 py-2 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity" style={{ background: C.orange }}>Create account</Link>
           <Link href="/merchant/qr-generate" className="px-4 py-2 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity"
             style={{ background: C.orange }}>
             Start accepting payments
@@ -391,7 +392,8 @@ function Nav() {
           {["How it works","For merchants","For customers","Security"].map((l) => (
             <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`} className="py-2.5 border-b" style={{ borderColor: C.border }} onClick={() => setOpen(false)}>{l}</a>
           ))}
-          <Link href="/frontend/register" className="py-2.5 border-b" style={{ borderColor: C.border }}>Sign in</Link>
+          <Link href="/sign-in" className="py-2.5 border-b" style={{ borderColor: C.border }}>Sign in</Link>
+          <Link href="/register" className="py-3 rounded-xl font-bold text-white text-center" style={{ background: C.orange, minHeight: 44 }}>Create account</Link>
           <Link href="/merchant/qr-generate" className="mt-1 py-3.5 rounded-xl font-bold text-white text-center" style={{ background: C.orange, minHeight: 44 }}>
             Start accepting payments
           </Link>
@@ -903,7 +905,7 @@ function Footer() {
               links: [
                 { label: "Merchant workspace", href: "/merchant/qr-generate" },
                 { label: "Customer approval", href: "/frontend/approve" },
-                { label: "Registration", href: "/frontend/register" },
+                { label: "Registration", href: "/register" },
               ],
             },
           ].map((col) => (

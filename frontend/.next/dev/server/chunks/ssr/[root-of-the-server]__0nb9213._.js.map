@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///home/mbuyiselo-thiya/Documents/abc_pay/frontend/src/app/(dashboard)/payments/page.tsx"],"sourcesContent":["export default function PaymentsPage() {\n  return (\n    <section>\n      <div className=\"eyebrow\">History</div>\n      <h1 style={{ fontSize: \"3rem\" }}>Payments</h1>\n      <p className=\"lead\">Payment history will be populated from the backend payment model.</p>\n      <div className=\"card\"><p className=\"muted\">No payments yet.</p></div>\n    </section>\n  );\n}\n"],"names":["PaymentsPage","className","style","fontSize"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBACE,8OAAC;;0BACC,8OAAC;gBAAIC,WAAU;0BAAU;;;;;;0BACzB,8OAAC;gBAAGC,OAAO;oBAAEC,UAAU;gBAAO;0BAAG;;;;;;0BACjC,8OAAC;gBAAEF,WAAU;0BAAO;;;;;;0BACpB,8OAAC;gBAAIA,WAAU;0BAAO,cAAA,8OAAC;oBAAEA,WAAU;8BAAQ;;;;;;;;;;;;;;;;;AAGjD"}},
+    {"offset": {"line": 78, "column": 0}, "map": {"version":3,"sources":["file:///home/mbuyiselo-thiya/Documents/abc_pay/frontend/src/app/favicon.ico.mjs%20(structured%20image%20object)"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 256, height: 256 }\n"],"names":["src","width","height"],"mappings":";;;;AAAA;;uCACe;IAAEA,KAAAA,sJAAG;IAAEC,OAAO;IAAKC,QAAQ;AAAI"}}]
+}
