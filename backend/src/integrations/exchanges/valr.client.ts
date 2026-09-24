@@ -21,20 +21,29 @@ export type ValrConfig = {
 };
 
 export class ValrClient implements ExchangeProvider {
-  private apiKey: string;
-  private apiSecret: string;
-  private baseUrl: string;
-  private subaccountId?: string;
-  private webhookSecret?: string;
-  private fallbackSolanaAddress?: string;
+  public apiKey: string;
+  public apiSecret: string;
+  public baseUrl: string;
+  public subaccountId?: string;
+  public webhookSecret?: string;
+  public fallbackSolanaAddress?: string;
 
   constructor(config?: ValrConfig) {
-    this.apiKey = config?.apiKey || env.valr.apiKey;
-    this.apiSecret = config?.apiSecret || env.valr.apiSecret;
+    this.apiKey = config?.apiKey !== undefined ? config.apiKey : env.valr.apiKey;
+    this.apiSecret = config?.apiSecret !== undefined ? config.apiSecret : env.valr.apiSecret;
     this.baseUrl = (config?.baseUrl || env.valr.baseUrl).replace(/\/$/, "");
-    this.subaccountId = config?.subaccountId || env.valr.subaccountId;
-    this.webhookSecret = config?.webhookSecret || env.valr.webhookSecret;
-    this.fallbackSolanaAddress = config?.solanaDepositAddress || env.valr.solanaDepositAddress;
+    this.subaccountId = config?.subaccountId !== undefined ? config.subaccountId : env.valr.subaccountId;
+    this.webhookSecret = config?.webhookSecret !== undefined ? config.webhookSecret : env.valr.webhookSecret;
+    this.fallbackSolanaAddress = config?.solanaDepositAddress !== undefined ? config.solanaDepositAddress : env.valr.solanaDepositAddress;
+  }
+
+  hasCredentials(): boolean {
+    return Boolean(
+      this.apiKey &&
+      this.apiSecret &&
+      this.apiKey !== "your_valr_api_key" &&
+      this.apiKey.trim().length > 0
+    );
   }
 
   private signRequest(
@@ -48,7 +57,7 @@ export class ValrClient implements ExchangeProvider {
     return createHmac("sha512", this.apiSecret).update(payload).digest("hex");
   }
 
-  private async request<T>(verb: "GET" | "POST" | "DELETE", path: string, body?: unknown): Promise<T> {
+  async request<T>(verb: "GET" | "POST" | "DELETE", path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const timestamp = Date.now();
     const bodyStr = body ? JSON.stringify(body) : "";
@@ -57,7 +66,7 @@ export class ValrClient implements ExchangeProvider {
       "Content-Type": "application/json",
     };
 
-    if (this.apiKey && this.apiSecret) {
+    if (this.hasCredentials()) {
       headers["X-VALR-API-KEY"] = this.apiKey;
       headers["X-VALR-SIGNATURE"] = this.signRequest(
         timestamp,
@@ -108,53 +117,54 @@ export class ValrClient implements ExchangeProvider {
    */
   async getSimpleQuote(
     pair: string,
-    payCurrency: string,
+    payInCurrency: string,
     payAmount: string,
     side: "BUY" | "SELL"
   ): Promise<ValrSimpleQuote> {
     return this.request<ValrSimpleQuote>("POST", `/v1/simple/${pair}/quote`, {
       payAmount,
-      payCurrency,
+      payInCurrency,
       side,
     });
   }
 
   /**
-   * Executes a simple order directly with VALR.
+   * Executes a simple order directly with VALR using real money.
    * POST /v1/simple/{pair}/order
    */
   async createSimpleOrder(
     pair: string,
     payAmount: string,
-    payCurrency: string,
+    payInCurrency: string,
     side: "BUY" | "SELL"
   ): Promise<ValrSimpleOrderResponse> {
     return this.request<ValrSimpleOrderResponse>("POST", `/v1/simple/${pair}/order`, {
       payAmount,
-      payCurrency,
+      payInCurrency,
       side,
     });
   }
 
   /**
    * Retrieves the Solana deposit address for USDC.
-   * Live endpoint: GET /v1/wallet/crypto/{currency}/deposit/address?network=SOL
+   * Live endpoint: GET /v1/wallet/crypto/{currency}/deposit/address?networkType=Solana
    */
   async getCryptoDepositAddress(
     currency = "USDC",
-    network = "SOL"
+    network = "Solana"
   ): Promise<ValrDepositAddressResponse> {
+    const networkParam = network.toUpperCase() === "SOL" || network.toLowerCase() === "solana" ? "Solana" : network;
     try {
       return await this.request<ValrDepositAddressResponse>(
         "GET",
-        `/v1/wallet/crypto/${currency}/deposit/address?network=${network}`
+        `/v1/wallet/crypto/${currency}/deposit/address?networkType=${networkParam}`
       );
     } catch (error) {
       if (this.fallbackSolanaAddress) {
         return {
           currency,
           address: this.fallbackSolanaAddress,
-          network,
+          network: networkParam,
         };
       }
       throw error;
@@ -169,13 +179,14 @@ export class ValrClient implements ExchangeProvider {
     currency: string,
     amount: string,
     address: string,
-    network = "SOL"
+    network = "Solana"
   ): Promise<ValrWithdrawResponse> {
+    const networkParam = network.toUpperCase() === "SOL" || network.toLowerCase() === "solana" ? "Solana" : network;
     return this.request<ValrWithdrawResponse>("POST", `/v1/wallet/crypto/${currency}/withdraw`, {
       amount,
       address,
       currency,
-      network,
+      networkType: networkParam,
     });
   }
 

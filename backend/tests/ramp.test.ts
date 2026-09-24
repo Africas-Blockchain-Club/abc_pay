@@ -23,7 +23,11 @@ describe("Solana Address Validation", () => {
 
 describe("USDC <-> ZAR Ramp API", () => {
   const store = new MemoryStore();
-  const valrClient = new ValrClient();
+  const valrClient = new ValrClient({
+    apiKey: "",
+    apiSecret: "",
+    solanaDepositAddress: "CZsLuXgqjjmmqtWshyHbYA6HtTgEiubHd6z61qjH4edi",
+  });
   const rampService = new RampService(store, valrClient);
   const app = createApp(store, rampService);
   const agent = request(app);

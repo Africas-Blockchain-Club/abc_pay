@@ -10,7 +10,12 @@ export const env = {
     apiKey: process.env.VALR_API_KEY ?? "",
     apiSecret: process.env.VALR_API_SECRET ?? "",
     baseUrl: process.env.VALR_BASE_URL ?? "https://api.valr.com",
-    subaccountId: process.env.VALR_SUBACCOUNT_ID,
+    subaccountId:
+      process.env.VALR_SUBACCOUNT_ID &&
+      process.env.VALR_SUBACCOUNT_ID !== "optional_subaccount_id" &&
+      process.env.VALR_SUBACCOUNT_ID.trim() !== ""
+        ? process.env.VALR_SUBACCOUNT_ID.trim()
+        : undefined,
     webhookSecret: process.env.VALR_WEBHOOK_SECRET,
     solanaDepositAddress: process.env.VALR_SOLANA_DEPOSIT_ADDRESS,
   },
