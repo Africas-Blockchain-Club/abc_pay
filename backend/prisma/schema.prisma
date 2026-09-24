@@ -36,20 +36,18 @@ enum RampStatus {
 }
 
 model User {
-  id            String        @id @default(uuid())
+  id            String      @id @default(uuid())
   name          String
   surname       String
-  email         String        @unique
-  phoneNumber   String        @unique @map("phone")
-  walletAddress String
-  role          String        @default("USER")
-  kycStatus     String        @default("NOT_STARTED")
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  email         String      @unique
+  phoneNumber   String      @unique
+  walletAddress String      @unique
+  role          String      @default("USER")
+  kycStatus     KycStatus   @default(NOT_STARTED)
+  createdAt     DateTime    @default(now())
 
   wallet        Wallet? 
   rampOrders    RampOrder[]
-  transactions  Transaction[]
 }
 
 model Wallet {
@@ -107,38 +105,7 @@ model BankAccount {
   accountNumber     String
   branchCode        String
   accountType       String   @default("CURRENT")
-  accountHolderName String?  @map("accountName")
+  accountHolderName String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-}
-
-model Transaction {
-  id             String    @id @default(uuid())
-  userId         String
-  user           User      @relation(fields: [userId], references: [id])
-  direction      String
-  status         String
-  fiatAmount     Decimal   @db.Decimal(18, 4)
-  fiatCurrency   String
-  cryptoAmount   Decimal   @db.Decimal(36, 18)
-  cryptoAsset    String
-  chain          String
-  valrMarketRate Decimal   @db.Decimal(36, 18)
-  markupBps      Int
-  finalRate      Decimal   @db.Decimal(36, 18)
-  valrOrderId    String?
-  depositTxHash  String?
-  payoutRef      String?
-  quoteExpiresAt DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-}
-
-model VerificationToken {
-  id         String   @id @default(uuid())
-  identifier String
-  token      String
-  type       String
-  expires    DateTime
-  createdAt  DateTime @default(now())
 }
