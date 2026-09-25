@@ -42,8 +42,8 @@ model User {
   email         String        @unique
   phoneNumber   String        @unique
   walletAddress String
-  role          String        @default("USER")
-  kycStatus     String        @default("NOT_STARTED")
+  role          UserRole      @default(USER)
+  kycStatus     KycStatus     @default(NOT_STARTED)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

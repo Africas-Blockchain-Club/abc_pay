@@ -132,7 +132,7 @@ export class PrismaStore implements AppStore {
         walletAddress: walletAddress,
         role: "USER",
         createdAt: new Date(),
-        kycStatus: "NOT_STARTED",
+        kycStatus: "NOT_STARTED" as const,
       },
     });
 
