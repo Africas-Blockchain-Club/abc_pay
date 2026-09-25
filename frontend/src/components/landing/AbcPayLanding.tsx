@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SignInModal } from "@/components/SignInModal";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -374,11 +375,7 @@ function Nav() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="text-sm font-medium hover:opacity-60 transition-opacity" style={{ color: C.navy }}>Sign in</Link>
-          <Link href="/merchant/qr-generate" className="px-4 py-2 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity"
-            style={{ background: C.orange }}>
-            Start accepting payments
-          </Link>
+          <SignInButton />
         </div>
 
         <button className="md:hidden flex flex-col gap-1.5 p-2" onClick={() => setOpen(!open)}>
@@ -391,13 +388,26 @@ function Nav() {
           {["How it works","For merchants","For customers","Security"].map((l) => (
             <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`} className="py-2.5 border-b" style={{ borderColor: C.border }} onClick={() => setOpen(false)}>{l}</a>
           ))}
-          <Link href="/login" className="py-2.5 border-b" style={{ borderColor: C.border }}>Sign in</Link>
-          <Link href="/merchant/qr-generate" className="mt-1 py-3.5 rounded-xl font-bold text-white text-center" style={{ background: C.orange, minHeight: 44 }}>
-            Start accepting payments
-          </Link>
+          <SignInButton />
         </div>
       )}
     </nav>
+  );
+}
+
+function SignInButton() {
+  const [modalOpen, setModalOpen] = useState(false);
+  return (
+    <>
+      <button
+        className="text-sm font-medium hover:opacity-60 transition-opacity"
+        style={{ color: C.navy, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        onClick={() => setModalOpen(true)}
+      >
+        Sign in
+      </button>
+      <SignInModal open={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 }
 
