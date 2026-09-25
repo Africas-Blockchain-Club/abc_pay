@@ -20,37 +20,36 @@ enum KycStatus {
   REJECTED
 }
 
-// enum PaymentStatus {
-//   CREATED
-//   QUOTED
-//   AWAITING_PAYMENT
-//   CONFIRMING
-//   CONVERTING
-//   SETTLING
-//   COMPLETED
-//   FAILED
-//   CANCELLED
-// }
+enum RampType {
+  ONRAMP
+  OFFRAMP
+}
 
-// enum LedgerEntryType {
-//   CREDIT
-//   DEBIT
-//   FEE
-//   SETTLEMENT
-// }
+enum RampStatus {
+  PENDING_DEPOSIT
+  PAYMENT_RECEIVED
+  CONVERTING
+  SETTLING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
 
 model User {
-  id            String    @id @default(uuid())
+  id            String        @id @default(uuid())
   name          String
   surname       String
-  email         String    @unique
-  phoneNumber   String    @unique
-  walletAddress String    @unique
-  role          String
-  kycStatus     KycStatus @default(NOT_STARTED)
-  createdAt     DateTime
+  email         String        @unique
+  phoneNumber   String        @unique @map("phone")
+  walletAddress String
+  role          String        @default("USER")
+  kycStatus     String        @default("NOT_STARTED")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   wallet        Wallet? 
+  rampOrders    RampOrder[]
+  transactions  Transaction[]
 }
 
 model Wallet {
@@ -71,59 +70,75 @@ model Merchant {
   businessRegistration String
 }
 
-// model Payment {
-//   id             String         @id @default(uuid())
-//   userId         String
-//   user           User           @relation(fields: [userId], references: [id])
-//   walletId       String?
-//   wallet         Wallet?        @relation(fields: [walletId], references: [id])
-//   merchantId     String?
-//   merchant       Merchant?      @relation(fields: [merchantId], references: [id])
-//   amountZar      Decimal        @db.Decimal(18, 2)
-//   cryptoAmount   Decimal?       @db.Decimal(36, 18)
-//   cryptoAsset    String         @default("USDC")
-//   feeZar         Decimal        @default(0) @db.Decimal(18, 2)
-//   merchantNetZar Decimal?       @db.Decimal(18, 2)
-//   txHash         String?        @unique
-//   status         PaymentStatus  @default(CREATED)
-//   quotes         Quote[]
-//   ledgerEntries  LedgerEntry[]
-//   createdAt      DateTime       @default(now())
-//   updatedAt      DateTime       @updatedAt
-// }
+model RampOrder {
+  id                       String     @id @default(uuid())
+  userId                   String?
+  user                     User?      @relation(fields: [userId], references: [id])
+  type                     RampType
+  status                   RampStatus @default(PENDING_DEPOSIT)
+  fiatCurrency             String     @default("ZAR")
+  fiatAmount               Decimal    @db.Decimal(18, 2)
+  cryptoAsset              String     @default("USDC")
+  cryptoAmount             Decimal    @db.Decimal(36, 18)
+  exchangeRate             Decimal    @db.Decimal(36, 18)
+  platformFeeRate          Decimal    @default(0.02) @db.Decimal(6, 4)
+  platformFeeZar           Decimal    @db.Decimal(18, 2)
+  network                  String     @default("SOL")
+  destinationWalletAddress String?
+  sourceWalletAddress      String?
+  cryptoDepositAddress     String?
+  txHash                   String?
+  bankName                 String?
+  accountNumber            String?
+  branchCode               String?
+  accountHolderName        String?
+  fiatReference            String?    @unique
+  valrOrderId              String?
+  valrWithdrawalId         String?
+  errorMessage             String?
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+}
 
-// model Quote {
-//   id           String   @id @default(uuid())
-//   paymentId    String
-//   payment      Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-//   provider     String
-//   pair         String
-//   rate         Decimal  @db.Decimal(36, 18)
-//   cryptoAmount Decimal  @db.Decimal(36, 18)
-//   expiresAt    DateTime
-//   createdAt    DateTime @default(now())
-// }
+model BankAccount {
+  id                String   @id @default(uuid())
+  userId            String?
+  bankName          String
+  accountNumber     String
+  branchCode        String
+  accountType       String   @default("CURRENT")
+  accountHolderName String?  @map("accountName")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
 
-// model LedgerEntry {
-//   id        String          @id @default(uuid())
-//   walletId  String?
-//   wallet    Wallet?         @relation(fields: [walletId], references: [id])
-//   paymentId String?
-//   payment   Payment?        @relation(fields: [paymentId], references: [id])
-//   type      LedgerEntryType
-//   asset     String
-//   amount    Decimal         @db.Decimal(36, 18)
-//   reference String?
-//   createdAt DateTime        @default(now())
-// }
+model Transaction {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  direction      String
+  status         String
+  fiatAmount     Decimal   @db.Decimal(18, 4)
+  fiatCurrency   String
+  cryptoAmount   Decimal   @db.Decimal(36, 18)
+  cryptoAsset    String
+  chain          String
+  valrMarketRate Decimal   @db.Decimal(36, 18)
+  markupBps      Int
+  finalRate      Decimal   @db.Decimal(36, 18)
+  valrOrderId    String?
+  depositTxHash  String?
+  payoutRef      String?
+  quoteExpiresAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
 
-// model KycProfile {
-//   id          String    @id @default(uuid())
-//   userId      String    @unique
-//   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   status      KycStatus @default(NOT_STARTED)
-//   provider    String?
-//   providerRef String?
-//   createdAt   DateTime  @default(now())
-//   updatedAt   DateTime  @updatedAt
-// }
+model VerificationToken {
+  id         String   @id @default(uuid())
+  identifier String
+  token      String
+  type       String
+  expires    DateTime
+  createdAt  DateTime @default(now())
+}

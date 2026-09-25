@@ -1,9 +1,21 @@
 import { randomUUID } from "node:crypto";
-import type { AppStore, CreateUserInput, UserRecord, WalletRecord } from "../types/store.js";
+import type {
+  AppStore,
+  BankAccountRecord,
+  CreateBankAccountInput,
+  CreateRampOrderInput,
+  CreateUserInput,
+  RampOrderRecord,
+  UpdateRampOrderInput,
+  UserRecord,
+  WalletRecord,
+} from "../types/store.js";
 
 export class MemoryStore implements AppStore {
   private users = new Map<string, UserRecord>();
   private wallets = new Map<string, WalletRecord>();
+  private rampOrders = new Map<string, RampOrderRecord>();
+  private bankAccounts = new Map<string, BankAccountRecord>();
 
   async findUserByEmail(email: string) {
     return [...this.users.values()].find((user) => user.email === email.toLowerCase()) ?? null;
@@ -55,5 +67,96 @@ export class MemoryStore implements AppStore {
 
   async getWalletByUserId(userId: string) {
     return this.wallets.get(userId) ?? null;
+  }
+
+  async createRampOrder(input: CreateRampOrderInput): Promise<RampOrderRecord> {
+    const now = new Date();
+    const order: RampOrderRecord = {
+      id: randomUUID(),
+      userId: input.userId ?? null,
+      type: input.type,
+      status: input.status ?? "PENDING_DEPOSIT",
+      fiatCurrency: input.fiatCurrency ?? "ZAR",
+      fiatAmount: input.fiatAmount,
+      cryptoAsset: input.cryptoAsset ?? "USDC",
+      cryptoAmount: input.cryptoAmount,
+      exchangeRate: input.exchangeRate,
+      platformFeeRate: input.platformFeeRate ?? "0.02",
+      platformFeeZar: input.platformFeeZar,
+      network: input.network ?? "SOL",
+      destinationWalletAddress: input.destinationWalletAddress ?? null,
+      sourceWalletAddress: input.sourceWalletAddress ?? null,
+      cryptoDepositAddress: input.cryptoDepositAddress ?? null,
+      txHash: null,
+      bankName: input.bankName ?? null,
+      accountNumber: input.accountNumber ?? null,
+      branchCode: input.branchCode ?? null,
+      accountHolderName: input.accountHolderName ?? null,
+      fiatReference: input.fiatReference ?? null,
+      valrOrderId: null,
+      valrWithdrawalId: null,
+      errorMessage: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.rampOrders.set(order.id, order);
+    return order;
+  }
+
+  async getRampOrderById(id: string): Promise<RampOrderRecord | null> {
+    return this.rampOrders.get(id) ?? null;
+  }
+
+  async findRampOrderByReference(reference: string): Promise<RampOrderRecord | null> {
+    return (
+      [...this.rampOrders.values()].find((order) => order.fiatReference === reference) ?? null
+    );
+  }
+
+  async updateRampOrder(id: string, updates: UpdateRampOrderInput): Promise<RampOrderRecord> {
+    const existing = this.rampOrders.get(id);
+    if (!existing) {
+      throw new Error(`Ramp order ${id} not found`);
+    }
+    const updated: RampOrderRecord = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.rampOrders.set(id, updated);
+    return updated;
+  }
+
+  async listRampOrders(userId?: string): Promise<RampOrderRecord[]> {
+    const orders = [...this.rampOrders.values()];
+    if (userId) {
+      return orders.filter((o) => o.userId === userId).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async createBankAccount(input: CreateBankAccountInput): Promise<BankAccountRecord> {
+    const now = new Date();
+    const account: BankAccountRecord = {
+      id: randomUUID(),
+      userId: input.userId ?? null,
+      bankName: input.bankName,
+      accountNumber: input.accountNumber,
+      branchCode: input.branchCode,
+      accountType: input.accountType ?? "CURRENT",
+      accountHolderName: input.accountHolderName ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.bankAccounts.set(account.id, account);
+    return account;
+  }
+
+  async findBankAccountByUserId(userId: string): Promise<BankAccountRecord | null> {
+    return (
+      [...this.bankAccounts.values()]
+        .filter((a) => a.userId === userId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null
+    );
   }
 }
