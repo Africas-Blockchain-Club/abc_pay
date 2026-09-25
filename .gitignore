@@ -10,3 +10,4 @@ frontend/.env.local
 backend/.env
 
 *.tsbuildinfo
+pnpm-lock.yaml
