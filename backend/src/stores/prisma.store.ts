@@ -13,6 +13,7 @@ import type {
   WalletRecord,
 } from "../types/store.js";
 import { Prisma } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
 
 type DbUser = {
   id: string;
@@ -150,12 +151,12 @@ export class PrismaStore implements AppStore {
         type: input.type,
         status: input.status ?? "PENDING_DEPOSIT",
         fiatCurrency: input.fiatCurrency ?? "ZAR",
-        fiatAmount: new Prisma.Decimal(input.fiatAmount),
+        fiatAmount: new Decimal(input.fiatAmount),
         cryptoAsset: input.cryptoAsset ?? "USDC",
-        cryptoAmount: new Prisma.Decimal(input.cryptoAmount),
-        exchangeRate: new Prisma.Decimal(input.exchangeRate),
-        platformFeeRate: input.platformFeeRate ? new Prisma.Decimal(input.platformFeeRate) : new Prisma.Decimal(0.02),
-        platformFeeZar: new Prisma.Decimal(input.platformFeeZar),
+        cryptoAmount: new Decimal(input.cryptoAmount),
+        exchangeRate: new Decimal(input.exchangeRate),
+        platformFeeRate: input.platformFeeRate ? new Decimal(input.platformFeeRate) : new Decimal(0.02),
+        platformFeeZar: new Decimal(input.platformFeeZar),
         network: input.network ?? "SOL",
         destinationWalletAddress: input.destinationWalletAddress,
         sourceWalletAddress: input.sourceWalletAddress,
