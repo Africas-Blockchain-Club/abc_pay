@@ -12,9 +12,11 @@ describe("wallet API", () => {
   it("returns the signed-in user's wallet", async () => {
     const agent = request.agent(createApp(new MemoryStore()));
     await agent.post("/api/v1/auth/register").send({
-      name: "Wallet User",
+      name: "Wallet",
+      surname: "User",
       email: "wallet@example.com",
-      password: "Password123!",
+      phoneNumber: "0812345678",
+      walletAddress: "0x1234567890abcdef1234567890abcdef12345678",
     });
 
     const response = await agent.get("/api/v1/wallets/me");
