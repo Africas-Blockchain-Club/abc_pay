@@ -14,6 +14,29 @@ type Props = {
   onClose: () => void;
 };
 
+type Eip6963Detail = { info: { rdns: string }; provider: { request(args: { method: string; params?: unknown[] }): Promise<unknown> } };
+
+function discoverMetaMask(): Promise<Eip6963Detail["provider"]> {
+  return new Promise((resolve, reject) => {
+    const onAnnounce = (event: Event) => {
+      const detail = (event as CustomEvent<Eip6963Detail>).detail;
+      if (detail?.info.rdns !== "io.metamask") return;
+      cleanup();
+      resolve(detail.provider);
+    };
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Install or enable MetaMask to continue."));
+    }, 500);
+    const cleanup = () => {
+      window.clearTimeout(timeout);
+      window.removeEventListener("eip6963:announceProvider", onAnnounce);
+    };
+    window.addEventListener("eip6963:announceProvider", onAnnounce);
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+  });
+}
+
 export function SignInModal({ open, initialView = "individual", onClose }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDivElement>(null);
@@ -61,16 +84,20 @@ export function SignInModal({ open, initialView = "individual", onClose }: Props
     setError("");
   }
 
-  async function connectWallet(signIn: boolean) {
+  async function connectWallet(signIn: boolean, changeWallet = false) {
     setBusy(true); setError("");
     try {
-      if (!window.ethereum) throw new Error("Install MetaMask to connect your wallet.");
-      const accounts = (await window.ethereum.request({ method: "eth_requestAccounts" })) as string[];
+      const provider = await discoverMetaMask();
+      if (changeWallet) {
+        await provider.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
+      }
+      const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
       if (!accounts?.[0]) throw new Error("Unlock MetaMask and select an account.");
       setAddress(accounts[0]);
       if (!signIn) return;
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not connect MetaMask.");
+      const message = caught instanceof Error ? caught.message : "Could not connect MetaMask.";
+      setError(/reject|deny/i.test(message) ? "MetaMask connection was cancelled." : message);
     } finally { setBusy(false); }
   }
 
@@ -130,6 +157,7 @@ export function SignInModal({ open, initialView = "individual", onClose }: Props
             <button type="button" className="abcAuthChoice abcMetaMask" onClick={() => void connectWallet(true)} disabled={busy || Boolean(address)}>
               <span className="abcAuthChoiceIcon abcFox" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 4.5 14.5 8 17 4.5 27 7l-4.5 8.5-5.5-3-5.5 3L7 11z" /><path d="m7 11 4.5 3.5 5.5-3 5.5 3L25 11l-2.5 9-5-2.5-5 2.5z" /></svg></span><span><strong>MetaMask</strong><small>{busy ? "Waiting for approval…" : address ? `${address.slice(0, 6)}…${address.slice(-4)} connected` : "Connect with your wallet"}</small></span><span aria-hidden="true">→</span>
             </button>
+            {address && <button type="button" className="abcAuthBack" onClick={() => void connectWallet(true, true)} disabled={busy}>Change wallet</button>}
             {address && <button type="button" className="abcAuthSubmit" onClick={continueToDashboard}>Continue to dashboard <span>→</span></button>}
           </div>
         )}
