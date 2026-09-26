@@ -88,6 +88,24 @@ export function createAuthRouter(store: AppStore) {
     }
   });
 
+  router.post("/login", async (req, res, next) => {
+    try {
+      const parsed = z.object({ walletAddress: z.string().trim().min(1) }).safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: "Wallet address required" });
+
+      const user = store.findUserByWalletAddress
+        ? await store.findUserByWalletAddress(parsed.data.walletAddress)
+        : null;
+      if (!user) return res.status(404).json({ message: "No account found for this wallet. Please register first." });
+
+      const token = signAuthToken({ sub: user.id, email: user.email, role: user.role });
+      setSession(res, token);
+      return res.json({ user: publicUser(user) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post("/logout", (_req, res) => {
     res.clearCookie("abc_pay_session");
     return res.status(204).send();

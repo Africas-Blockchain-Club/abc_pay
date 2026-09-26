@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
+import { useAuth, type AuthUser } from "@/context/AuthContext";
 
 export type AuthView = "type" | "individual" | "register";
 
@@ -39,6 +40,7 @@ function discoverMetaMask(): Promise<Eip6963Detail["provider"]> {
 
 export function SignInModal({ open, initialView = "individual", onClose }: Props) {
   const router = useRouter();
+  const { login, setUser } = useAuth();
   const dialog = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<AuthView>(initialView === "type" ? "individual" : initialView);
@@ -101,11 +103,16 @@ export function SignInModal({ open, initialView = "individual", onClose }: Props
     } finally { setBusy(false); }
   }
 
-  function continueToDashboard() {
+  async function continueToDashboard() {
     if (!address) return;
-    sessionStorage.setItem("abc_pay_metamask_address", address);
-    sessionStorage.setItem("abc_pay_role", "individual");
-    router.push("/wallet");
+    setBusy(true); setError("");
+    try {
+      await login(address);
+      sessionStorage.setItem("abc_pay_metamask_address", address);
+      router.push("/wallet");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not sign in.");
+    } finally { setBusy(false); }
   }
 
   async function register(event: FormEvent<HTMLFormElement>) {
@@ -118,7 +125,7 @@ export function SignInModal({ open, initialView = "individual", onClose }: Props
     }
     setBusy(true);
     try {
-      await api("/auth/register", {
+      const result = await api<{ user: AuthUser }>("/auth/register", {
         method: "POST",
         body: JSON.stringify({
           name: data.get("name"),
@@ -128,8 +135,8 @@ export function SignInModal({ open, initialView = "individual", onClose }: Props
           walletAddress,
         }),
       });
+      setUser(result.user);
       sessionStorage.setItem("abc_pay_metamask_address", walletAddress);
-      sessionStorage.setItem("abc_pay_role", "individual");
       router.push("/wallet");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create your account.");

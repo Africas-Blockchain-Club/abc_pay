@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 type WalletResponse = {
   wallet: { id: string; publicAddress: string | null; chain: string; stablecoin: string; balanceCached: string };
@@ -16,6 +17,7 @@ const SAMPLE_ACTIVITY = [
 ];
 
 export default function WalletPage() {
+  const { user } = useAuth();
   const [data, setData] = useState<WalletResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -27,10 +29,11 @@ export default function WalletPage() {
       .then(setData)
       .catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load wallet."))
       .finally(() => {
-        setAddress(sessionStorage.getItem("abc_pay_metamask_address") ?? "");
+        const stored = sessionStorage.getItem("abc_pay_metamask_address");
+        setAddress(stored ?? user?.walletAddress ?? "");
         setLoading(false);
       });
-  }, []);
+  }, [user]);
 
   async function connectWallet() {
     setError("");
@@ -56,7 +59,7 @@ export default function WalletPage() {
     <div className="abcWalletLayout">
       <div className="abcWalletMain">
         <div className="abcWalletTitle">
-          <div><div className="abcSectionKicker">DASHBOARD</div><h1>Wallet overview</h1>
+          <div><div className="abcSectionKicker">DASHBOARD</div><h1>Welcome, {user?.name ?? "—"}</h1>
             <p>Monitor your stablecoin balance and payment activity.</p></div>
           <Link className="abcNewRequest" href="/merchant/qr-generate">▦ &nbsp; New payment request</Link>
         </div>
