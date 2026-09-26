@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 
 const links = [
@@ -17,6 +17,19 @@ export function DashboardNav() {
   const path = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setTheme(document.documentElement.dataset.dashboardTheme === "light" ? "light" : "dark"));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.dashboardTheme = next;
+    localStorage.setItem("abc-pay-dashboard-theme", next);
+    setTheme(next);
+  }
 
   async function logout() {
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
@@ -39,6 +52,10 @@ export function DashboardNav() {
       </nav>
       <div className="abcDashHeaderActions">
         <span className="abcDashNetwork">Polygon mainnet</span>
+        <button type="button" className="abcDashTheme" onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
+          <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+        </button>
         <button type="button" className="abcDashLogout" onClick={logout}>Log out</button>
         <button type="button" className="abcDashMenu" aria-expanded={menuOpen}
           aria-controls="dashboard-navigation" aria-label="Toggle navigation"

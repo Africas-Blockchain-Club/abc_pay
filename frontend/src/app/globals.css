@@ -17,6 +17,32 @@
 }
 
 @layer components {
+  .abcDashTheme { display:grid; place-items:center; width:34px; height:34px; padding:0; border:1px solid #536275; border-radius:9px; background:transparent; color:#fff; font-size:17px; cursor:pointer; }
+  .abcDashTheme:hover { border-color:#36d5a0; color:#36d5a0; }
+  html[data-dashboard-theme="light"] .dashboard { background:#f5f7fa; color:#102345; }
+  html[data-dashboard-theme="light"] .abcDashHeader { border-color:#dfe5ec; background:#fff; }
+  html[data-dashboard-theme="light"] .abcDashBrand strong { color:#102345; }
+  html[data-dashboard-theme="light"] .abcDashBrand small { color:#647898; }
+  html[data-dashboard-theme="light"] .abcDashNav a { color:#647898; }
+  html[data-dashboard-theme="light"] .abcDashNav a:hover,html[data-dashboard-theme="light"] .abcDashNav a[aria-current="page"] { color:#102345; }
+  html[data-dashboard-theme="light"] .abcDashNetwork { color:#647898; }
+  html[data-dashboard-theme="light"] .abcDashLogout,html[data-dashboard-theme="light"] .abcDashTheme { border-color:#cbd5df; color:#102345; }
+  html[data-dashboard-theme="light"] .abcDashTheme:hover { border-color:#36d5a0; color:#099875; }
+  html[data-dashboard-theme="light"] .abcWalletTitle h1,html[data-dashboard-theme="light"] .abcQuickSection h2,html[data-dashboard-theme="light"] .abcActivityHeading h2 { color:#102345; }
+  html[data-dashboard-theme="light"] .abcWalletTitle p,html[data-dashboard-theme="light"] .abcQuickGrid small,html[data-dashboard-theme="light"] .abcSampleLabel { color:#647898; }
+  html[data-dashboard-theme="light"] .abcNewRequest { background:#f45b05; }
+  html[data-dashboard-theme="light"] .abcBalanceCard { box-shadow:0 16px 32px #10234512; }
+  html[data-dashboard-theme="light"] .abcQuickGrid button { border-color:#dfe5ec; background:#fff; color:#102345; }
+  html[data-dashboard-theme="light"] .abcQuickGrid button:not(:disabled):hover { border-color:#f45b05; }
+  html[data-dashboard-theme="light"] .abcQuickGrid button > span { color:#f45b05; }
+  html[data-dashboard-theme="light"] .abcTransaction { border-color:#dfe5ec; background:#fff; }
+  html[data-dashboard-theme="light"] .abcTransaction strong { color:#102345; }
+  html[data-dashboard-theme="light"] .abcTransaction small { color:#647898; }
+  html[data-dashboard-theme="light"] .abcDashNav { background:#fff; }
+  @media (max-width:960px) { html[data-dashboard-theme="light"] .abcDashNav { border-color:#dfe5ec; background:#fff; } html[data-dashboard-theme="light"] .abcDashMenu { color:#102345; } }
+}
+
+@layer components {
   .v0Landing { overflow-x: clip; }
   .abcQrPage { color:#f4f7fb; }.abcQrPage h1{margin:7px 0;font-size:35px;letter-spacing:-.04em}.abcQrPage>p{color:#91a2b7}.abcQrCard{display:grid;gap:18px;width:min(100%,440px);margin-top:28px;padding:24px;border:1px solid #27364a;border-radius:15px;background:#101c2d}.abcQrCard label{display:grid;gap:8px;font-size:12px;font-weight:800}.abcQrCard input{padding:12px;border:1px solid #536275;border-radius:9px;background:#08111f;color:#fff}.abcQrCard img{width:100%;height:auto;max-width:320px;border-radius:8px;background:#fff}.abcQrCard code{overflow-wrap:anywhere;color:#91a2b7;font-size:10px}
 }
