@@ -20,7 +20,7 @@ export function createApp(store: AppStore, rampService?: RampService) {
     })
   );
 
-  app.use(cors({ origin: env.frontendUrl, credentials: true }));
+  app.use(cors({ origin: env.frontendUrls, credentials: true }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
 
