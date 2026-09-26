@@ -1,4 +1,5 @@
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/api/v1`;
+const rawBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = new URL("/api/v1/", rawBase.startsWith("http") ? rawBase : `https://${rawBase}`).toString().replace(/\/$/, "");
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
