@@ -17,6 +17,17 @@
 }
 
 @layer components {
+  .v0Landing { overflow-x: clip; }
+  .abcQrPage { color:#f4f7fb; }.abcQrPage h1{margin:7px 0;font-size:35px;letter-spacing:-.04em}.abcQrPage>p{color:#91a2b7}.abcQrCard{display:grid;gap:18px;width:min(100%,440px);margin-top:28px;padding:24px;border:1px solid #27364a;border-radius:15px;background:#101c2d}.abcQrCard label{display:grid;gap:8px;font-size:12px;font-weight:800}.abcQrCard input{padding:12px;border:1px solid #536275;border-radius:9px;background:#08111f;color:#fff}.abcQrCard img{width:100%;height:auto;max-width:320px;border-radius:8px;background:#fff}.abcQrCard code{overflow-wrap:anywhere;color:#91a2b7;font-size:10px}
+}
+
+/* v0 ABC Pay landing migration. Authentication remains the app's real portal modal. */
+@layer components {
+  .v0Landing{--ink:#102345;--muted:#647898;--line:#dfe5ec;--orange:#f45b05;color:var(--ink);background:#fff;font-family:Arial,Helvetica,sans-serif}.v0Landing *{box-sizing:border-box}.v0Content{width:min(1220px,calc(100% - 72px));margin:auto}.v0Brand{display:flex;align-items:center;gap:9px;color:var(--ink)}.v0Brand img{object-fit:contain}.v0Brand strong,.v0Brand small{display:block}.v0Brand strong{font-size:17px;line-height:17px;letter-spacing:-.4px}.v0Brand small{margin-top:3px;color:#6c7e99;font-size:8px}.v0Header{height:90px;display:flex;align-items:center;justify-content:space-between}.v0Header nav{display:flex;gap:34px;margin-left:auto;margin-right:65px;font-size:13px;font-weight:600}.v0Header nav a:hover,.v0Text:hover{color:var(--orange)}.v0Header>div{display:flex;align-items:center;gap:18px}.v0Text,.v0Create{border:0;font-size:13px;font-weight:700;cursor:pointer}.v0Text{background:none;color:var(--ink)}.v0Create{display:inline-flex;gap:8px;align-items:center;border-radius:9px;padding:12px 15px;background:var(--orange);color:#fff;font-size:12px;font-weight:800;box-shadow:0 5px 14px #f45b0524}.v0Hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 385px;align-items:center;gap:70px;min-height:620px}.v0Hero:before{position:absolute;z-index:0;inset:0 -20vw;content:"";opacity:.55;background-image:linear-gradient(23deg,transparent 49.9%,#edf1f4 50%,transparent 50.1%),linear-gradient(110deg,transparent 49.9%,#edf1f4 50%,transparent 50.1%),radial-gradient(circle at 32% 46%,#dfe7ed 0 4px,transparent 5px);background-size:700px 500px,650px 600px,100% 100%;pointer-events:none}.v0Copy,.v0PaymentCard{position:relative;z-index:1}.v0Context{color:#7186a4;font-size:12px;font-weight:700}.v0Copy h1{margin:27px 0 0;font-size:62px;line-height:.99;letter-spacing:-3.2px;font-weight:800}.v0Copy h1 em{color:var(--orange);font-style:normal}.v0Copy>p:not(.v0Context){max-width:545px;margin-top:27px;color:var(--muted);font-size:18px;line-height:1.6}.v0Actions{display:flex;gap:12px;margin-top:27px}.v0Primary,.v0Secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:11px;padding:15px 22px;font-size:14px;font-weight:800;cursor:pointer}.v0Primary{background:var(--orange);color:#fff;box-shadow:0 5px 14px #f45b0524}.v0Secondary{border:2px solid var(--ink);color:var(--ink);padding:13px 24px}.v0Proof{display:flex;gap:25px;margin-top:23px;padding-top:20px;border-top:1px solid var(--line);color:#536c91;font-size:13px}.v0PaymentCard{overflow:hidden;border:1px solid #d7e0e8;border-radius:17px;background:#fff;box-shadow:0 22px 48px #1023451f}.v0PaymentHead{padding:18px 19px;border-bottom:1px solid var(--line)}.v0PaymentHead .v0Brand img{width:27px;height:27px}.v0PaymentHead .v0Brand strong{font-size:14px}.v0PaymentBody{padding:23px 20px 21px}.v0PaymentBody label{color:#7186a4;font-size:11px;font-weight:800;letter-spacing:.1em}.v0Amount{display:flex;align-items:center;gap:11px;margin-top:9px;padding:14px;border:2px solid var(--orange);border-radius:12px}.v0Amount span{color:#7b8da8;font-weight:700}.v0Amount strong{flex:1;font-size:23px}.v0Amount small{color:#637999;font-weight:700}.v0Quote{margin:15px 0;padding:13px 14px;border-radius:13px;background:#f4f6f8}.v0Quote div{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}.v0Quote span{color:#7186a4}.v0Full{width:100%}.v0Trust{background:var(--ink);color:#fff}.v0Trust .v0Content{display:grid;grid-template-columns:repeat(4,1fr)}.v0Trust div>div{display:grid;gap:6px;padding:27px 22px;border-left:1px solid #ffffff1c}.v0Trust b{color:var(--orange);font-size:11px}.v0Trust strong{font-size:13px}.v0Trust span{color:#9babbe;font-size:11px}.v0Kicker{color:var(--orange);font-size:11px;font-weight:800;letter-spacing:.08em}.v0Steps{padding-top:86px;padding-bottom:93px}.v0Steps h2,.v0Merchant h2{margin-top:10px;font-size:30px;line-height:1.12;letter-spacing:-1.2px}.v0Steps>div:last-child{display:grid;grid-template-columns:repeat(4,1fr);margin-top:49px}.v0Steps article{padding-right:28px}.v0Steps article>b{display:grid;place-items:center;width:29px;height:29px;border:1px solid #cad4de;border-radius:7px;color:var(--orange);font-size:10px}.v0Steps h3{margin-top:22px;font-size:14px}.v0Steps p,.v0Merchant p{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.55}.v0Merchant{padding:82px 0;background:#f5f7fa}.v0Merchant>.v0Content{display:grid;grid-template-columns:1fr 360px;gap:110px;align-items:center}.v0Merchant>div>div>p{margin-top:15px;font-size:16px}.v0Merchant ul{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:28px 0 0;padding:0;list-style:none;color:#4f6686;font-size:12px}.v0Merchant li::first-letter{color:var(--orange)}.v0Mini{padding:17px;border:1px solid #d7e0e8;border-radius:13px;background:#fff;box-shadow:0 15px 28px #10234512}.v0Mini>div,.v0Mini>p{display:flex;justify-content:space-between;align-items:center}.v0Mini>div{font-size:11px}.v0Mini>div span,.v0Mini i{color:#0a9d77;font-size:10px;font-style:normal}.v0Mini section{display:grid;gap:6px;margin:15px 0 9px;padding:15px;border-radius:9px;background:var(--ink);color:#fff}.v0Mini section small{color:#a7b5c8;font-size:10px}.v0Mini section strong{font-size:20px}.v0Mini p{padding:11px 2px;border-bottom:1px solid #edf0f3;color:var(--ink)}.v0Mini p b{font-size:10px}.v0Footer{display:flex;align-items:center;justify-content:space-between;min-height:98px;color:#7186a4;font-size:11px}.v0Footer>a{color:var(--orange);font-weight:800}
+  @media(max-width:850px){.v0Content{width:min(100% - 38px,620px)}.v0Header{height:76px}.v0Header nav{display:none}.v0Header>div{gap:9px}.v0Hero{display:block;min-height:0;padding:65px 0 75px}.v0Hero h1{font-size:53px}.v0PaymentCard{max-width:390px;margin-top:42px}.v0Trust .v0Content{grid-template-columns:1fr 1fr}.v0Steps>div:last-child{grid-template-columns:1fr 1fr;gap:35px 0}.v0Merchant>.v0Content{grid-template-columns:1fr;gap:40px}.v0Footer{flex-wrap:wrap;gap:15px;padding:25px 0}}@media(max-width:470px){.v0Hero h1{font-size:46px}.v0Copy>p:not(.v0Context){font-size:16px}.v0Actions{flex-direction:column}.v0Proof{display:grid}.v0Trust .v0Content,.v0Steps>div:last-child,.v0Merchant ul{grid-template-columns:1fr}.v0Trust div>div{border-left:0;border-top:1px solid #ffffff1c}}
+}
+
+@layer components {
 :root {
   --bg: #070b12;
   --surface: #101722;
@@ -238,4 +249,128 @@ button, input { font: inherit; }
   color: #0f1f3d;
 }
 
+}
+
+/* Approved ABC Pay prototype treatment, adapted to the existing app. */
+@layer components {
+  .abcHeaderCreate { display:inline-flex; align-items:center; gap:9px; padding:11px 15px; border:0; border-radius:9px; background:#f45b05; color:#fff; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 5px 14px #f45b0524; }
+  .abcHeaderCreate:hover { background:#cc5100; }
+  .abcHeroContext { color:#7186a4; font-size:12px; font-weight:700; letter-spacing:.02em; }
+
+  .abcAuthBackdrop { position:fixed; inset:0; z-index:100; display:grid; place-items:center; overflow:auto; padding:20px; background:#071326a8; backdrop-filter:blur(5px); }
+  .abcAuthDialog { position:relative; width:min(100%,500px); max-height:calc(100dvh - 40px); overflow:auto; border-radius:18px; padding:35px; background:#fff; box-shadow:0 28px 80px #0713264d; color:#102345; }
+  .abcAuthClose { position:absolute; right:18px; top:18px; display:grid; place-items:center; width:32px; height:32px; border:0; border-radius:50%; background:#f3f5f7; color:#102345; font-size:24px; cursor:pointer; }
+  .abcAuthLabel { display:flex; align-items:center; gap:8px; color:#e85d04; font-size:11px; font-weight:800; }
+  .abcAuthLabel img { object-fit:contain; }
+  .abcAuthDialog h2 { margin:17px 0 0; color:#102345; font-size:28px; font-weight:700; letter-spacing:-.04em; }
+  .abcAuthLead { color:#647898; margin:8px 0 24px; font-size:13px; line-height:1.55; }
+  .abcAuthChoices { display:grid; gap:10px; }
+  .abcAuthChoice { display:flex; align-items:center; gap:13px; width:100%; padding:14px; border:1px solid #dfe5ec; border-radius:10px; background:#f7f9fb; color:#102345; text-align:left; cursor:pointer; }
+  .abcAuthSelected { margin-top:22px; cursor:default; }
+  .abcAuthSelected > span:last-child { color:#f45b05; }
+  .abcAuthChoice:hover,.abcMetaMask { border-color:#e85d04; background:#fff8f3; }
+  .abcAuthChoice > span:nth-child(2) { display:grid; gap:4px; flex:1; }
+  .abcAuthChoice strong { font-size:13px; }
+  .abcAuthChoice small { color:#7186a4; font-size:12px; }
+  .abcAuthChoiceIcon { display:grid; place-items:center; width:40px; height:40px; border-radius:9px; background:#fff; font-size:20px; }
+  .abcFox { color:#f45b05; }
+  .abcFox svg { width:29px; height:29px; fill:currentColor; }
+  .abcAuthUnavailable { opacity:.55; cursor:default; }
+  .abcAuthBack,.abcAuthConnect { padding:4px 0; border:0; background:transparent; color:#d45404; text-align:left; font-size:12px; font-weight:800; cursor:pointer; }
+  .abcAuthForm { display:grid; gap:14px; }
+  .abcAuthNameRow { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+  .abcAuthForm label { display:grid; gap:7px; font-size:12px; font-weight:800; }
+  .abcAuthForm input { width:100%; min-width:0; padding:12px 13px; border:1px solid #cbd5df; border-radius:9px; outline:none; background:#fafbfc; color:#102345; font-size:13px; }
+  .abcAuthForm input:focus { border-color:#e85d04; box-shadow:0 0 0 3px #e85d041c; }
+  .abcAuthConnect { display:flex; justify-content:space-between; margin-top:-8px; }
+  .abcAuthConnect span { color:#8292aa; font-weight:500; }
+  .abcAuthSubmit { display:flex; justify-content:space-between; align-items:center; width:100%; padding:14px 17px; border:0; border-radius:10px; background:#e85d04; color:#fff; font-size:14px; font-weight:800; cursor:pointer; }
+  .abcAuthSubmit:disabled,.abcAuthChoice:disabled { opacity:.65; cursor:wait; }
+  .abcAuthError { margin:13px 0 0; padding:10px 12px; border:1px solid #ffc9c1; border-radius:8px; background:#fff0ed; color:#a83626; font-size:12px; }
+  .abcAuthSwitch { margin:20px 0 0; color:#647898; text-align:center; font-size:12px; }
+  .abcAuthSwitch button { border:0; background:transparent; color:#d45404; font-weight:800; cursor:pointer; }
+
+  .dashboard { min-height:100vh; display:block; background:#08111f; color:#f4f7fb; }
+  .dashboard .main { width:min(1240px,calc(100% - 56px)); margin:0 auto; padding:56px 0; }
+  .abcDashHeader { position:relative; display:flex; align-items:center; gap:50px; min-height:82px; padding:0 max(28px,calc((100vw - 1240px)/2)); border-bottom:1px solid #ffffff16; }
+  .abcDashBrand { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .abcDashBrand img { object-fit:contain; }
+  .abcDashBrand strong,.abcDashBrand small { display:block; }
+  .abcDashBrand strong { color:#fff; font-size:17px; line-height:18px; }
+  .abcDashBrand small { color:#98a8ba; font-size:9px; margin-top:3px; }
+  .abcDashNav { display:flex; align-items:center; flex:1; gap:28px; align-self:stretch; }
+  .abcDashNav a { display:flex; align-items:center; border-bottom:2px solid transparent; color:#91a2b7; font-size:13px; white-space:nowrap; }
+  .abcDashNav a:hover,.abcDashNav a[aria-current="page"] { border-color:#f45b05; color:#fff; }
+  .abcDashHeaderActions { display:flex; align-items:center; gap:16px; }
+  .abcDashNetwork { color:#a1b1c4; font-size:11px; white-space:nowrap; }
+  .abcDashLogout { padding:10px 14px; border:1px solid #536275; border-radius:9px; background:transparent; color:#fff; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .abcDashMenu { display:none; border:0; background:transparent; color:#fff; font-size:24px; cursor:pointer; }
+
+  .abcWalletLayout { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:28px; }
+  .abcWalletTitle { display:flex; justify-content:space-between; align-items:end; gap:20px; margin-bottom:29px; }
+  .abcSectionKicker { color:#f45b05; font-size:11px; font-weight:800; letter-spacing:.08em; }
+  .abcWalletTitle h1 { margin:7px 0 0; max-width:none; color:#fff; font-size:35px; line-height:1.1; letter-spacing:-.04em; }
+  .abcWalletTitle p { margin:8px 0 0; color:#91a2b7; font-size:13px; }
+  .abcNewRequest { display:inline-flex; align-items:center; justify-content:center; padding:14px 18px; border-radius:10px; background:#e85d04; color:#fff; font-size:13px; font-weight:800; white-space:nowrap; }
+  .abcBalanceCard { padding:25px 29px; border-radius:15px; background:#fff; box-shadow:0 20px 40px #0004; color:#102345; }
+  .abcBalanceTop { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+  .abcBalanceTop > span { color:#7186a4; font-size:11px; font-weight:800; letter-spacing:.1em; }
+  .abcConnectWallet { border:0; background:transparent; color:#099875; font-size:11px; font-weight:800; cursor:pointer; }
+  .abcBalanceAmount { display:flex; align-items:baseline; gap:10px; margin-top:30px; }
+  .abcBalanceAmount strong { font-size:52px; line-height:1; letter-spacing:-.05em; }
+  .abcBalanceAmount span { color:#7286a3; font-weight:800; }
+  .abcBalanceMeta { display:flex; gap:36px; margin-top:28px; padding-top:19px; border-top:1px solid #dfe5ec; }
+  .abcBalanceMeta > div { display:grid; gap:6px; min-width:0; }
+  .abcBalanceMeta span { color:#7589a5; font-size:11px; }
+  .abcBalanceMeta strong,.abcBalanceMeta button { color:#102345; font-size:12px; font-weight:800; }
+  .abcBalanceMeta button { padding:0; border:0; background:none; text-align:left; cursor:pointer; }
+  .abcBalanceMeta button:disabled { cursor:default; }
+  .abcBalanceMeta small { color:#099875; font-size:10px; }
+  .abcQuickSection { margin-top:41px; }
+  .abcQuickSection h2,.abcActivityHeading h2 { margin:0; color:#fff; font-size:17px; }
+  .abcQuickGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:15px; }
+  .abcQuickGrid button { display:grid; gap:7px; padding:16px; border:1px solid #27364a; border-radius:11px; background:#101c2d; color:#d9e1eb; text-align:left; }
+  .abcQuickGrid button:not(:disabled) { cursor:pointer; }
+  .abcQuickGrid button:disabled { opacity:.7; cursor:default; }
+  .abcQuickGrid button > span { color:#e85d04; font-size:18px; }
+  .abcQuickGrid strong { font-size:13px; }
+  .abcQuickGrid small { color:#91a2b7; font-size:10px; }
+  .abcActivityHeading { display:flex; justify-content:space-between; align-items:center; }
+  .abcActivityHeading a { color:#36d5a0; font-size:11px; }
+  .abcWalletError { display:grid; gap:5px; margin-top:18px; padding:13px; border:1px solid #754043; border-radius:10px; background:#3a1d20; color:#ffab91; }
+  .abcWalletError strong { font-size:12px; }
+  .abcWalletError span { font-size:11px; line-height:1.5; }
+  .abcSampleLabel { color:#91a2b7; font-size:10px; margin:17px 0 9px; }
+  .abcActivityList { display:grid; gap:8px; }
+  .abcTransaction { display:flex; align-items:center; gap:10px; padding:13px 11px; border:1px solid #1e3045; border-radius:10px; background:#0e1b2b; }
+  .abcTxIcon { display:grid; place-items:center; width:28px; height:28px; border-radius:8px; background:#123b3a; color:#36d5a0; }
+  .abcTxIcon.out { background:#422c24; color:#ff8b56; }
+  .abcTransaction > div { display:grid; gap:4px; flex:1; }
+  .abcTransaction strong { color:#fff; font-size:11px; }
+  .abcTransaction small { color:#889bb2; font-size:10px; }
+  .abcTxAmount { color:#36d5a0; font-size:12px; font-weight:800; white-space:nowrap; }
+  .abcTxAmount.out { color:#ff8b56; }
+
+  @media (max-width:960px) {
+    .abcDashHeader { justify-content:space-between; padding:0 19px; gap:12px; }
+    .abcDashNav { display:none; position:absolute; top:72px; left:14px; right:14px; z-index:10; flex-direction:column; align-items:stretch; gap:0; padding:8px; border:1px solid #2b3b50; border-radius:10px; background:#101e30; }
+    .abcDashNav.isOpen { display:flex; }
+    .abcDashNav a { min-height:42px; padding:10px; }
+    .abcDashMenu { display:block; }
+    .abcDashNetwork { display:none; }
+    .abcWalletLayout { grid-template-columns:1fr; }
+    .abcActivity { margin-top:12px; }
+  }
+  @media (max-width:600px) {
+    .dashboard .main { width:calc(100% - 38px); padding:39px 0; }
+    .abcWalletTitle { display:block; }
+    .abcWalletTitle h1 { font-size:31px; }
+    .abcNewRequest { margin-top:20px; }
+    .abcBalanceCard { padding:21px; }
+    .abcBalanceAmount strong { font-size:42px; }
+    .abcBalanceMeta { flex-direction:column; gap:16px; }
+    .abcQuickGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .abcAuthDialog { padding:28px 22px; }
+    .abcAuthNameRow { grid-template-columns:1fr; }
+  }
 }
