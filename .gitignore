@@ -28,3 +28,4 @@ backend/.env
 
 *.tsbuildinfo
 pnpm-lock.yaml
+backend/.env

@@ -71,6 +71,12 @@ npm run prisma:migrate -w backend
 npm run dev
 ```
 
+6. Check whats in your database by running:
+
+```bash
+npm run prisma:studio -w backend
+```
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:4000
 - Health check: http://localhost:4000/api/v1/health

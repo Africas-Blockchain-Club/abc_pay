@@ -51,7 +51,7 @@ export function DashboardNav() {
         ))}
       </nav>
       <div className="abcDashHeaderActions">
-        <span className="abcDashNetwork">Polygon mainnet</span>
+        <span className="abcDashNetwork">Solana mainnet</span>
         <button type="button" className="abcDashTheme" onClick={toggleTheme}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
           <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
