@@ -257,6 +257,50 @@ registry.registerPath({
   },
 });
 
+// Recently added
+registry.registerPath({
+  method: "post",
+  path: "/api/v1/auth/login",
+  summary: "Log in with wallet address",
+  description:
+    "Authenticates an existing user using their registered wallet address and creates an authentication session.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            walletAddress: z
+              .string()
+              .trim()
+              .min(1)
+              .openapi({
+                example: "0x7Fa89244D97cdf91D7fCA5a5f3075FBefC4a9e82",
+              }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Login successful",
+      content: {
+        "application/json": {
+          schema: z.object({
+            user: UserSchema,
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Wallet address required",
+    },
+    404: {
+      description: "No account found for this wallet",
+    },
+  },
+});
+
 registry.registerPath({
   method: "post",
   path: "/api/v1/auth/logout",
