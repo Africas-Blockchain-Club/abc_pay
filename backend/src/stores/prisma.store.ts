@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { getUsdcBalance } from "../services/usdc.service.js";
 import type {
   AppStore,
   BankAccountRecord,
@@ -41,15 +42,26 @@ function mapUser(user: DbUser): UserRecord {
   };
 }
 
-function userToWallet(user: { id: string; walletAddress: string }): WalletRecord {
+function userToWallet(
+  wallet: {
+    id: string;
+    userId: string;
+    publicAddress: string | null;
+    chain: string;
+    stablecoin: string;
+    balanceCached: Decimal;
+    createdAt: Date;
+  },
+  balance?: string,
+): WalletRecord {
   return {
-    id: user.id,
-    userId: user.id,
-    publicAddress: user.walletAddress,
-    chain: "EVM",
-    stablecoin: "USDC",
-    balanceCached: "0",
-    createdAt: new Date(),
+    id: wallet.id,
+    userId: wallet.userId,
+    publicAddress: wallet.publicAddress,
+    chain: wallet.chain,
+    stablecoin: wallet.stablecoin,
+    balanceCached: balance ?? wallet.balanceCached.toString(),
+    createdAt: wallet.createdAt,
   };
 }
 
@@ -136,13 +148,44 @@ export class PrismaStore implements AppStore {
       },
     });
 
-    return { user: mapUser(user), wallet: userToWallet(user) };
+   const wallet = await prisma.wallet.findUnique({
+  where: { userId: user.id },
+});
+
+if (!wallet) {
+  throw new Error("Wallet was not created");
+}
+
+return {
+  user: mapUser(user),
+  wallet: userToWallet(wallet),
+};
   }
 
   async getWalletByUserId(userId: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    return user ? userToWallet(user) : null;
+  const wallet = await prisma.wallet.findUnique({
+    where: { userId },
+  });
+
+  if (!wallet) {
+    return null;
   }
+
+  if (!wallet.publicAddress) {
+    return userToWallet(wallet);
+  }
+
+  const liveBalance = await getUsdcBalance(wallet.publicAddress);
+
+  await prisma.wallet.update({
+    where: { id: wallet.id },
+    data: {
+      balanceCached: new Decimal(liveBalance),
+    },
+  });
+
+  return userToWallet(wallet, liveBalance);
+}
 
   async createRampOrder(input: CreateRampOrderInput): Promise<RampOrderRecord> {
     const order = await prisma.rampOrder.create({
