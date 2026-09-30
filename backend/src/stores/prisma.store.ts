@@ -132,35 +132,42 @@ export class PrismaStore implements AppStore {
   }
 
   async createUserWithWallet(input: CreateUserInput) {
-    const walletAddress = input.walletAddress;
-    const phoneNumber = input.phoneNumber;
+  const { walletAddress, phoneNumber, name, surname, email } = input;
 
-    const user = await prisma.user.create({
-      data: {
-        name: input.name,
-        surname: input.surname,
-        email: input.email.toLowerCase(),
-        phoneNumber: phoneNumber,
-        walletAddress: walletAddress,
-        role: "USER",
-        createdAt: new Date(),
-        kycStatus: "NOT_STARTED" as const,
+  const user = await prisma.user.create({
+    data: {
+      name: name,
+      surname: surname,
+      email: email.toLowerCase(),
+      phoneNumber: phoneNumber,
+      walletAddress: walletAddress, // Stores address in the User table
+      role: "USER",
+      kycStatus: "NOT_STARTED",
+      // This nested 'create' inserts the row into the Wallet table
+      wallet: {
+        create: {
+          publicAddress: walletAddress, // Matches 'publicAddress' in your schema
+          chain: "EVM",                // Matches your default or override here
+          stablecoin: "USDC",
+          balanceCached: 0,
+        },
       },
-    });
+    },
+    include: {
+      wallet: true, // This ensures the wallet data is returned in the 'user' object
+    },
+  });
 
-   const wallet = await prisma.wallet.findUnique({
-  where: { userId: user.id },
-});
-
-if (!wallet) {
-  throw new Error("Wallet was not created");
-}
-
-return {
-  user: mapUser(user),
-  wallet: userToWallet(wallet),
-};
+  // Since we used 'include', user.wallet now contains the stored address record
+  if (!user.wallet) {
+    throw new Error("Wallet was not created in database");
   }
+
+  return {
+    user: mapUser(user),
+    wallet: userToWallet(user.wallet),
+  };
+}
 
   async getWalletByUserId(userId: string) {
   const wallet = await prisma.wallet.findUnique({
