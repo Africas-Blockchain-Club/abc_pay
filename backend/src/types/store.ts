@@ -136,4 +136,46 @@ export interface AppStore {
 
   createBankAccount(input: CreateBankAccountInput): Promise<BankAccountRecord>;
   findBankAccountByUserId?(userId: string): Promise<BankAccountRecord | null>;
+
+  createPaymentRequest(input: CreatePaymentRequestInput): Promise<PaymentRequestRecord>;
+  getPaymentRequestById(id: string): Promise<PaymentRequestRecord | null>;
+  confirmPaymentRequest(id: string, updates: ConfirmPaymentInput): Promise<PaymentRequestRecord>;
+  listPaymentRequests(userId: string): Promise<PaymentRequestRecord[]>;
 }
+
+export type PaymentRequestRecord = {
+  id: string;
+  userId: string;
+  userName?: string;
+  recipientAddress: string;
+  amountUsdc: string;
+  amountZar?: string | null;
+  network: string;
+  token: string;
+  tokenAddress: string;
+  description?: string | null;
+  status: "PENDING" | "CONFIRMED" | "FAILED" | "EXPIRED";
+  txHash?: string | null;
+  payerAddress?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type CreatePaymentRequestInput = {
+  userId: string;
+  userName?: string;
+  recipientAddress: string;
+  amountUsdc: string;
+  amountZar?: string | null;
+  network?: string;
+  token?: string;
+  tokenAddress?: string;
+  description?: string | null;
+};
+
+export type ConfirmPaymentInput = {
+  txHash: string;
+  payerAddress: string;
+  amountUsdc?: string;
+};
+
