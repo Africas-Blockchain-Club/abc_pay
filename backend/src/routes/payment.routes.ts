@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { AppStore } from "../types/store.js";
+import { env } from "../config/env.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.middleware.js";
 import { USDC_ADDRESS, verifyUsdcTransfer } from "../services/usdc.service.js";
 
@@ -11,6 +12,7 @@ const createPaymentRequestSchema = z.object({
   }, "Amount must be a positive number"),
   amountZar: z.union([z.string(), z.number()]).optional(),
   description: z.string().trim().max(140).optional(),
+  recipientAddress: z.string().trim().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid EVM wallet address").optional(),
 });
 
 const confirmPaymentSchema = z.object({
@@ -20,6 +22,19 @@ const confirmPaymentSchema = z.object({
 
 export function createPaymentRouter(store: AppStore): Router {
   const router = Router();
+
+  /**
+   * GET /api/v1/payments/config
+   * Returns payment configuration including default merchant wallet address.
+   */
+  router.get("/config", (_req, res) => {
+    res.json({
+      defaultMerchantWalletAddress: env.merchantWalletAddress || "",
+      usdcContractAddress: USDC_ADDRESS,
+      network: "SEPOLIA",
+      chainId: 11155111,
+    });
+  });
 
   /**
    * POST /api/v1/payments/request
@@ -35,8 +50,14 @@ export function createPaymentRouter(store: AppStore): Router {
         return;
       }
 
-      if (!user.walletAddress) {
-        res.status(400).json({ message: "User account does not have a linked wallet address" });
+      // Resolves recipient address: explicit request override > merchant user wallet > configured env default
+      const recipientAddress =
+        parsed.recipientAddress ||
+        user.walletAddress ||
+        env.merchantWalletAddress;
+
+      if (!recipientAddress) {
+        res.status(400).json({ message: "User account does not have a linked wallet address and no recipientAddress was provided" });
         return;
       }
 
@@ -47,7 +68,7 @@ export function createPaymentRouter(store: AppStore): Router {
       const paymentRequest = await store.createPaymentRequest({
         userId: user.id,
         userName: `${user.name} ${user.surname}`.trim(),
-        recipientAddress: user.walletAddress,
+        recipientAddress,
         amountUsdc: formattedUsdc,
         amountZar: formattedZar,
         network: "SEPOLIA",
@@ -58,7 +79,7 @@ export function createPaymentRouter(store: AppStore): Router {
 
       // EIP-681 standard URI for ERC-20 transfer:
       const rawUnits = (BigInt(Math.round(numAmount * 1e6))).toString();
-      const eip681Url = `ethereum:${USDC_ADDRESS}@11155111/transfer?address=${user.walletAddress}&uint256=${rawUnits}`;
+      const eip681Url = `ethereum:${USDC_ADDRESS}@11155111/transfer?address=${recipientAddress}&uint256=${rawUnits}`;
 
       res.status(201).json({
         ...paymentRequest,

@@ -63,8 +63,8 @@ export default function PaymentCheckoutPage({
       setPayerAccount(account);
       const balance = await getPayerUsdcBalance(account);
       setPayerBalance(balance);
-    } catch (err: any) {
-      setError(err?.message || "Failed to connect wallet.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to connect wallet.");
     }
   }
 
@@ -100,8 +100,8 @@ export default function PaymentCheckoutPage({
       setPayment(res.payment);
       setConfirmedTx(txHash);
       setPayStep("");
-    } catch (err: any) {
-      setError(err?.message || "Payment transaction failed or was cancelled.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Payment transaction failed or was cancelled.");
     } finally {
       setPaying(false);
     }
@@ -147,7 +147,7 @@ export default function PaymentCheckoutPage({
                 background: confirmedTx || payment.status === "CONFIRMED" ? "rgba(34, 197, 94, 0.15)" : "rgba(234, 179, 8, 0.15)",
                 color: confirmedTx || payment.status === "CONFIRMED" ? "#4ade80" : "#facc15"
               }}>
-                {confirmedTx || payment.status === "CONFIRMED" ? "✓ PAID & SETTLED" : "PENDING PAYMENT"}
+                {confirmedTx || payment.status === "CONFIRMED" ? "PAID & SETTLED" : "PENDING PAYMENT"}
               </span>
             </div>
 
@@ -174,7 +174,7 @@ export default function PaymentCheckoutPage({
               </div>
               {payment.amountZar && (
                 <div style={{ fontSize: "0.875rem", color: "#94a3b8", marginTop: "0.25rem" }}>
-                  ≈ R {payment.amountZar} ZAR
+                  R {payment.amountZar} ZAR
                 </div>
               )}
             </div>
@@ -182,7 +182,6 @@ export default function PaymentCheckoutPage({
             {/* Success State */}
             {confirmedTx || payment.status === "CONFIRMED" ? (
               <div style={{ background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: "0.75rem", padding: "1.25rem", textAlign: "center" }}>
-                <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
                 <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "#4ade80", marginBottom: "0.25rem" }}>
                   Payment Transferred Successfully!
                 </div>
@@ -197,7 +196,7 @@ export default function PaymentCheckoutPage({
                       rel="noopener noreferrer"
                       style={{ fontSize: "0.8125rem", color: "#60a5fa", textDecoration: "underline", wordBreak: "break-all" }}
                     >
-                      View on Sepolia Etherscan ↗
+                      View on Sepolia Etherscan
                     </a>
                   </div>
                 )}
@@ -217,11 +216,6 @@ export default function PaymentCheckoutPage({
                   </div>
                 )}
 
-                {payStep && (
-                  <div style={{ background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.4)", borderRadius: "0.5rem", padding: "0.75rem", color: "#93c5fd", fontSize: "0.8125rem", marginBottom: "1rem", textAlign: "center" }}>
-                    ⏳ {payStep}
-                  </div>
-                )}
 
                 {payerAccount ? (
                   <div>
@@ -234,6 +228,11 @@ export default function PaymentCheckoutPage({
                         <span>Your Sepolia USDC:</span>
                         <span style={{ fontWeight: 600, color: "#f8fafc" }}>{payerBalance} USDC</span>
                       </div>
+                    )}
+                    {payStep && (
+                      <p style={{ fontSize: "0.8125rem", color: "#38bdf8", textAlign: "center", marginBottom: "0.5rem" }}>
+                        {payStep}
+                      </p>
                     )}
                     <button
                       type="button"

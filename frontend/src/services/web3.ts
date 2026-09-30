@@ -53,8 +53,9 @@ export async function ensureSepoliaNetwork(): Promise<void> {
         method: "wallet_switchEthereumChain",
         params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }],
       });
-    } catch (switchError: any) {
-      if (switchError.code === 4902 || switchError?.data?.originalError?.code === 4902) {
+    } catch (switchError: unknown) {
+      const err = switchError as { code?: number; data?: { originalError?: { code?: number } } };
+      if (err?.code === 4902 || err?.data?.originalError?.code === 4902) {
         await window.ethereum.request({
           method: "wallet_addEthereumChain",
           params: [

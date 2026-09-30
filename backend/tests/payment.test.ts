@@ -87,4 +87,25 @@ describe("Payments API (Sepolia USDC QR & Transfers)", () => {
     expect(historyRes.status).toBe(200);
     expect(historyRes.body.payments).toHaveLength(2);
   });
+
+  it("creates a Sepolia payment request with a custom configured recipientAddress", async () => {
+    const customWallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+    const res = await agent.post("/api/v1/payments/request").send({
+      amountUsdc: "50.00",
+      recipientAddress: customWallet,
+      description: "Custom destination payout",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.recipientAddress).toBe(customWallet);
+    expect(res.body.eip681Url).toContain(customWallet);
+  });
+
+  it("reads payment config including default merchant wallet address", async () => {
+    const publicClient = request(createApp(store));
+    const res = await publicClient.get("/api/v1/payments/config");
+    expect(res.status).toBe(200);
+    expect(res.body.network).toBe("SEPOLIA");
+    expect(res.body.usdcContractAddress).toBeDefined();
+  });
 });
