@@ -212,7 +212,7 @@ export class PrismaStore implements AppStore {
         exchangeRate: new Decimal(input.exchangeRate),
         platformFeeRate: input.platformFeeRate ? new Decimal(input.platformFeeRate) : new Decimal(0.02),
         platformFeeZar: new Decimal(input.platformFeeZar),
-        network: input.network ?? "SOL",
+        network: input.network ?? "SEPOLIA",
         destinationWalletAddress: input.destinationWalletAddress,
         sourceWalletAddress: input.sourceWalletAddress,
         cryptoDepositAddress: input.cryptoDepositAddress,
