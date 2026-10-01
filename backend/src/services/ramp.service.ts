@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { AppStore, RampOrderRecord, RampStatus } from "../types/store.js";
 import { ValrClient } from "../integrations/exchanges/valr.client.js";
+import { calculateConversionQuote } from "./conversion.service.js";
 
 export function isValidSolanaAddress(address: string): boolean {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
@@ -106,69 +107,84 @@ export class RampService {
    * Pulls real-time prices from VALR and applies the 2% ABC Pay platform markup.
    */
   async getQuote(request: QuoteRequest): Promise<QuoteResponse> {
-    if (request.fromAsset === request.toAsset) {
-      throw new Error("Source and destination assets must differ");
-    }
-
-    const numAmount = typeof request.amount === "string" ? parseFloat(request.amount) : request.amount;
-    if (isNaN(numAmount) || numAmount <= 0) {
-      throw new Error("Invalid quote amount");
-    }
-
-    const marketSummary = await this.valrClient.getMarketSummary("USDCZAR");
-    const quoteId = randomUUID();
-    const expiresAt = new Date(Date.now() + 60 * 1000).toISOString();
-
-    if (request.fromAsset === "ZAR" && request.toAsset === "USDC") {
-      // ON-RAMP: Buying USDC with ZAR
-      const askPrice = parseFloat(marketSummary.askPrice);
-      const platformFeeZar = numAmount * PLATFORM_FEE_RATE;
-      const netZar = numAmount - platformFeeZar;
-      const destinationAmount = (netZar / askPrice).toFixed(6);
-      const effectiveRate = (numAmount / parseFloat(destinationAmount)).toFixed(4);
-
-      return {
-        quoteId,
-        pair: "USDCZAR",
-        side: "BUY",
-        network: "SOL",
-        baseRate: askPrice.toFixed(4),
-        rate: effectiveRate,
-        sourceAmount: numAmount.toFixed(2),
-        sourceAsset: "ZAR",
-        destinationAmount,
-        destinationAsset: "USDC",
-        platformFeeZar: platformFeeZar.toFixed(2),
-        platformFeeRate: "0.0200",
-        expiresAt,
-      };
-    } else if (request.fromAsset === "USDC" && request.toAsset === "ZAR") {
-      // OFF-RAMP: Selling USDC for ZAR
-      const bidPrice = parseFloat(marketSummary.bidPrice);
-      const grossZar = numAmount * bidPrice;
-      const platformFeeZar = grossZar * PLATFORM_FEE_RATE;
-      const netZar = (grossZar - platformFeeZar).toFixed(2);
-      const effectiveRate = (parseFloat(netZar) / numAmount).toFixed(4);
-
-      return {
-        quoteId,
-        pair: "USDCZAR",
-        side: "SELL",
-        network: "SOL",
-        baseRate: bidPrice.toFixed(4),
-        rate: effectiveRate,
-        sourceAmount: numAmount.toFixed(6),
-        sourceAsset: "USDC",
-        destinationAmount: netZar,
-        destinationAsset: "ZAR",
-        platformFeeZar: platformFeeZar.toFixed(2),
-        platformFeeRate: "0.0200",
-        expiresAt,
-      };
-    } else {
-      throw new Error(`Unsupported pair ${request.fromAsset}/${request.toAsset}. Only USDC/ZAR supported.`);
-    }
+  if (request.fromAsset === request.toAsset) {
+    throw new Error("Source and destination assets must differ");
   }
+
+  const numAmount =
+    typeof request.amount === "string"
+      ? parseFloat(request.amount)
+      : request.amount;
+
+  if (isNaN(numAmount) || numAmount <= 0) {
+    throw new Error("Invalid quote amount");
+  }
+
+  const quoteId = randomUUID();
+  const expiresAt = new Date(Date.now() + 60 * 1000).toISOString();
+
+  // ZAR → USDC
+  if (request.fromAsset === "ZAR" && request.toAsset === "USDC") {
+    // VALR provides the current USDC/ZAR market price
+    const marketSummary =
+      await this.valrClient.getMarketSummary("USDCZAR");
+
+    const askPrice = parseFloat(marketSummary.askPrice);
+
+    const platformFeeZar = numAmount * PLATFORM_FEE_RATE;
+    const netZar = numAmount - platformFeeZar;
+
+    const destinationAmount = (netZar / askPrice).toFixed(6);
+    const effectiveRate = (
+      numAmount / parseFloat(destinationAmount)
+    ).toFixed(4);
+
+    return {
+      quoteId,
+      pair: "USDCZAR",
+      side: "BUY",
+      network: "SOL",
+      baseRate: askPrice.toFixed(4),
+      rate: effectiveRate,
+      sourceAmount: numAmount.toFixed(2),
+      sourceAsset: "ZAR",
+      destinationAmount,
+      destinationAsset: "USDC",
+      platformFeeZar: platformFeeZar.toFixed(2),
+      platformFeeRate: "0.0200",
+      expiresAt,
+    };
+  }
+
+  // USDC → ZAR
+  if (request.fromAsset === "USDC" && request.toAsset === "ZAR") {
+    const conversion = calculateConversionQuote({
+      cryptoAmount: String(numAmount),
+      exchangeRate: "18.00",
+      feeRate: "0.02",
+    });
+
+    return {
+      quoteId,
+      pair: "USDCZAR",
+      side: "SELL",
+      network: "SOL",
+      baseRate: conversion.exchangeRate,
+      rate: conversion.exchangeRate,
+      sourceAmount: conversion.cryptoAmount,
+      sourceAsset: "USDC",
+      destinationAmount: conversion.netFiatAmount,
+      destinationAsset: "ZAR",
+      platformFeeZar: conversion.feeAmount,
+      platformFeeRate: conversion.feeRate,
+      expiresAt,
+    };
+  }
+
+  throw new Error(
+    `Unsupported pair ${request.fromAsset}/${request.toAsset}. Only USDC/ZAR supported.`,
+  );
+}
 
   /**
    * Initiates an on-ramp order (Fiat ZAR -> USDC on Solana).
