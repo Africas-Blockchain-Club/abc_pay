@@ -188,7 +188,7 @@ export class RampService {
     input: CreateOnrampInput,
   ): Promise<OnrampResponse> {
     if (!isValidEvmAddress(input.destinationWalletAddress)) {
-      throw new Error("Invalid destination source wallet address");
+      throw new Error("Invalid destination wallet address");
     }
 
     const quote = await this.getQuote({
@@ -248,7 +248,7 @@ export class RampService {
       input.sourceWalletAddress &&
       !isValidEvmAddress(input.sourceWalletAddress)
     ) {
-      throw new Error("Invalid source source wallet address");
+      throw new Error("Invalid source wallet address");
     }
 
     const quote = await this.getQuote({
