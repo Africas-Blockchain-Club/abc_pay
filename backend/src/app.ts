@@ -8,6 +8,7 @@ import { env } from "./config/env.js";
 import { createAuthRouter } from "./routes/auth.routes.js";
 import { createWalletRouter } from "./routes/wallet.routes.js";
 import { createRampRouter } from "./routes/ramp.routes.js";
+import { createPaymentRouter } from "./routes/payment.routes.js";
 import { RampService } from "./services/ramp.service.js";
 import { generateOpenApiSpec } from "./docs/openapi.js";
 
@@ -36,6 +37,7 @@ export function createApp(store: AppStore, rampService?: RampService) {
   app.use("/api/v1/auth", createAuthRouter(store));
   app.use("/api/v1/wallets", createWalletRouter(store));
   app.use("/api/v1/ramp", createRampRouter(activeRampService));
+  app.use("/api/v1/payments", createPaymentRouter(store));
 
   app.use((_req, res) => res.status(404).json({ message: "Route not found" }));
 

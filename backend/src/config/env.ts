@@ -6,6 +6,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET ?? "dev-only-change-me",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   isProduction: process.env.NODE_ENV === "production",
+  merchantWalletAddress: process.env.MERCHANT_USDC_WALLET_ADDRESS || process.env.DEFAULT_MERCHANT_WALLET_ADDRESS || "",
   valr: {
     apiKey: process.env.VALR_API_KEY ?? "",
     apiSecret: process.env.VALR_API_SECRET ?? "",

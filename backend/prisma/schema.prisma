@@ -83,7 +83,7 @@ model RampOrder {
   exchangeRate             Decimal    @db.Decimal(36, 18)
   platformFeeRate          Decimal    @default(0.02) @db.Decimal(6, 4)
   platformFeeZar           Decimal    @db.Decimal(18, 2)
-  network                  String     @default("SOL")
+  network                  String     @default("SEPOLIA")
   destinationWalletAddress String?
   sourceWalletAddress      String?
   cryptoDepositAddress     String?

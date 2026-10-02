@@ -2,9 +2,12 @@ import { randomUUID } from "node:crypto";
 import type {
   AppStore,
   BankAccountRecord,
+  ConfirmPaymentInput,
   CreateBankAccountInput,
+  CreatePaymentRequestInput,
   CreateRampOrderInput,
   CreateUserInput,
+  PaymentRequestRecord,
   RampOrderRecord,
   UpdateRampOrderInput,
   UserRecord,
@@ -16,6 +19,7 @@ export class MemoryStore implements AppStore {
   private wallets = new Map<string, WalletRecord>();
   private rampOrders = new Map<string, RampOrderRecord>();
   private bankAccounts = new Map<string, BankAccountRecord>();
+  private paymentRequests = new Map<string, PaymentRequestRecord>();
 
   async findUserByEmail(email: string) {
     return [...this.users.values()].find((user) => user.email === email.toLowerCase()) ?? null;
@@ -158,5 +162,56 @@ export class MemoryStore implements AppStore {
         .filter((a) => a.userId === userId)
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null
     );
+  }
+
+  async createPaymentRequest(input: CreatePaymentRequestInput): Promise<PaymentRequestRecord> {
+    const now = new Date();
+    const request: PaymentRequestRecord = {
+      id: `abc_pay_req_${randomUUID().slice(0, 8)}`,
+      userId: input.userId,
+      userName: input.userName,
+      recipientAddress: input.recipientAddress,
+      amountUsdc: input.amountUsdc,
+      amountZar: input.amountZar ?? null,
+      network: input.network ?? "SEPOLIA",
+      token: input.token ?? "USDC",
+      tokenAddress: input.tokenAddress ?? "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      description: input.description ?? null,
+      status: "PENDING",
+      txHash: null,
+      payerAddress: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.paymentRequests.set(request.id, request);
+    return request;
+  }
+
+  async getPaymentRequestById(id: string): Promise<PaymentRequestRecord | null> {
+    return this.paymentRequests.get(id) ?? null;
+  }
+
+  async confirmPaymentRequest(id: string, updates: ConfirmPaymentInput): Promise<PaymentRequestRecord> {
+    const req = this.paymentRequests.get(id);
+    if (!req) {
+      throw new Error(`Payment request ${id} not found`);
+    }
+
+    const updated: PaymentRequestRecord = {
+      ...req,
+      status: "CONFIRMED",
+      txHash: updates.txHash,
+      payerAddress: updates.payerAddress,
+      amountUsdc: updates.amountUsdc ?? req.amountUsdc,
+      updatedAt: new Date(),
+    };
+    this.paymentRequests.set(id, updated);
+    return updated;
+  }
+
+  async listPaymentRequests(userId: string): Promise<PaymentRequestRecord[]> {
+    return [...this.paymentRequests.values()]
+      .filter((r) => r.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }

@@ -82,7 +82,7 @@ export const OnrampRequestSchema = registry.register(
   "OnrampRequest",
   z.object({
     amountZar: z.union([z.string(), z.number()]).openapi({ example: "1000.00" }),
-    destinationSolanaAddress: z
+    destinationWalletAddress: z
       .string()
       .openapi({ example: "7nxp59B99iV7YpHmC48o5hK41UoFjA3Y9D6M1kP1h9d2" }),
     userId: z.string().uuid().optional(),
@@ -132,7 +132,7 @@ export const OfframpRequestSchema = registry.register(
   "OfframpRequest",
   z.object({
     amountUsdc: z.union([z.string(), z.number()]).openapi({ example: "50.00" }),
-    sourceSolanaAddress: z
+    sourceWalletAddress: z
       .string()
       .optional()
       .openapi({ example: "7nxp59B99iV7YpHmC48o5hK41UoFjA3Y9D6M1kP1h9d2" }),
