@@ -345,69 +345,32 @@ export class RampService {
   }
 
   async executeSettlement(orderId: string): Promise<RampOrderRecord> {
-    const order = await this.getOrderById(orderId);
+  const order = await this.getOrderById(orderId);
 
-    if (order.status === "COMPLETED") {
-      return order;
+  if (order.status === "COMPLETED") {
+    return order;
+  }
+
+  try {
+    if (order.type === "OFFRAMP" && order.status !== "PAYMENT_RECEIVED") {
+      throw new Error(
+        `Off-ramp order must have a verified crypto deposit before settlement. Current status: ${order.status}`,
+      );
     }
 
     await this.store.updateRampOrder(orderId, {
       status: "CONVERTING",
     });
 
-    try {
-      if (order.type === "ONRAMP") {
-        let valrOrderId = "VALR-SWAP-ONRAMP-SIM";
-
-        try {
-          const swap = await this.valrClient.createSimpleOrder(
-            "USDCZAR",
-            order.fiatAmount,
-            "ZAR",
-            "BUY",
-          );
-
-          if (swap?.id) {
-            valrOrderId = swap.id;
-          }
-        } catch {
-          // Dev mode fallback
-        }
-
-        let valrWithdrawalId = "VALR-TX-SEPOLIA-SIM";
-
-        if (order.destinationWalletAddress) {
-          try {
-            const withdrawal = await this.valrClient.withdrawCrypto(
-              "USDC",
-              order.cryptoAmount,
-              order.destinationWalletAddress,
-              "SEPOLIA",
-            );
-
-            if (withdrawal?.id) {
-              valrWithdrawalId = withdrawal.id;
-            }
-          } catch {
-            // Dev mode fallback
-          }
-        }
-
-        return await this.store.updateRampOrder(orderId, {
-          status: "COMPLETED",
-          valrOrderId,
-          valrWithdrawalId,
-        });
-      }
-
-      let valrOrderId = "VALR-SWAP-OFFRAMP-SIM";
+    if (order.type === "ONRAMP") {
+      let valrOrderId = "VALR-SWAP-ONRAMP-SIM";
 
       try {
         const swap = await this.valrClient.createSimpleOrder(
           "USDCZAR",
-          order.cryptoAmount,
-          "USDC",
-          "SELL",
+          order.fiatAmount,
+          "ZAR",
+          "BUY",
         );
 
         if (swap?.id) {
@@ -417,19 +380,71 @@ export class RampService {
         // Dev mode fallback
       }
 
+      let valrWithdrawalId = "VALR-TX-SEPOLIA-SIM";
+
+      if (order.destinationWalletAddress) {
+        try {
+          const withdrawal = await this.valrClient.withdrawCrypto(
+            "USDC",
+            order.cryptoAmount,
+            order.destinationWalletAddress,
+            "SEPOLIA",
+          );
+
+          if (withdrawal?.id) {
+            valrWithdrawalId = withdrawal.id;
+          }
+        } catch {
+          // Dev mode fallback
+        }
+      }
+
       return await this.store.updateRampOrder(orderId, {
         status: "COMPLETED",
         valrOrderId,
+        valrWithdrawalId,
       });
-    } catch (error) {
-      await this.store.updateRampOrder(orderId, {
-        status: "FAILED",
-        errorMessage: (error as Error).message,
-      });
-
-      throw error;
     }
+
+    // OFFRAMP: convert USDC -> ZAR and simulate bank payout
+    await this.store.updateRampOrder(orderId, {
+      status: "SETTLING",
+    });
+
+    const cryptoAmount = Number(order.cryptoAmount);
+    const exchangeRate = Number(order.exchangeRate);
+    const feeRate = Number(order.platformFeeRate);
+
+    const grossFiatAmount = cryptoAmount * exchangeRate;
+    const platformFee = grossFiatAmount * feeRate;
+    const netFiatAmount = grossFiatAmount - platformFee;
+
+    console.log("Mock bank payout:", {
+      orderId,
+      cryptoAmount,
+      exchangeRate,
+      grossFiatAmount,
+      platformFee,
+      netFiatAmount,
+      bankName: order.bankName,
+      accountNumber: order.accountNumber,
+      accountHolderName: order.accountHolderName,
+    });
+
+    return await this.store.updateRampOrder(orderId, {
+      status: "COMPLETED",
+      fiatAmount: netFiatAmount.toFixed(2),
+      platformFeeZar: platformFee.toFixed(2),
+    });
+  } catch (error) {
+    await this.store.updateRampOrder(orderId, {
+      status: "FAILED",
+      errorMessage: (error as Error).message,
+    });
+
+    throw error;
   }
+}
 
   async handleValrWebhook(
     payload: any,

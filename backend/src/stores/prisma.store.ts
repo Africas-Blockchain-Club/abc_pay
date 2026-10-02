@@ -237,20 +237,24 @@ export class PrismaStore implements AppStore {
   }
 
   async updateRampOrder(id: string, updates: UpdateRampOrderInput): Promise<RampOrderRecord> {
-    const data: Prisma.RampOrderUpdateInput = {};
-    if (updates.status !== undefined) data.status = updates.status;
-    if (updates.cryptoDepositAddress !== undefined) data.cryptoDepositAddress = updates.cryptoDepositAddress;
-    if (updates.txHash !== undefined) data.txHash = updates.txHash;
-    if (updates.valrOrderId !== undefined) data.valrOrderId = updates.valrOrderId;
-    if (updates.valrWithdrawalId !== undefined) data.valrWithdrawalId = updates.valrWithdrawalId;
-    if (updates.errorMessage !== undefined) data.errorMessage = updates.errorMessage;
+  const data: Prisma.RampOrderUpdateInput = {};
 
-    const order = await prisma.rampOrder.update({
-      where: { id },
-      data,
-    });
-    return mapRampOrder(order);
-  }
+  if (updates.status !== undefined) data.status = updates.status;
+  if (updates.fiatAmount !== undefined) data.fiatAmount = updates.fiatAmount;
+  if (updates.platformFeeZar !== undefined) data.platformFeeZar = updates.platformFeeZar;
+  if (updates.cryptoDepositAddress !== undefined) data.cryptoDepositAddress = updates.cryptoDepositAddress;
+  if (updates.txHash !== undefined) data.txHash = updates.txHash;
+  if (updates.valrOrderId !== undefined) data.valrOrderId = updates.valrOrderId;
+  if (updates.valrWithdrawalId !== undefined) data.valrWithdrawalId = updates.valrWithdrawalId;
+  if (updates.errorMessage !== undefined) data.errorMessage = updates.errorMessage;
+
+  const order = await prisma.rampOrder.update({
+    where: { id },
+    data,
+  });
+
+  return mapRampOrder(order);
+}
 
   async listRampOrders(userId?: string): Promise<RampOrderRecord[]> {
     const where: Prisma.RampOrderWhereInput = {};

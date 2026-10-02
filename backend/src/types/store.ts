@@ -104,6 +104,8 @@ export type CreateRampOrderInput = {
 
 export type UpdateRampOrderInput = {
   status?: RampStatus;
+  fiatAmount?: string;
+  platformFeeZar?: string;
   cryptoDepositAddress?: string | null;
   txHash?: string | null;
   valrOrderId?: string | null;
