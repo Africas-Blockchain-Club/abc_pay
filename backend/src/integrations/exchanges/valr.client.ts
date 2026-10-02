@@ -99,20 +99,6 @@ export class ValrClient implements ExchangeProvider {
    * Live public endpoint: GET /v1/public/{pair}/marketsummary
    */
   async getMarketSummary(pair = "USDCZAR"): Promise<ValrMarketSummary> {
-    if (process.env.NODE_ENV === "test" || process.env.VITEST !== undefined) {
-      return {
-        currencyPair: pair,
-        askPrice: "18.5000",
-        bidPrice: "18.4500",
-        lastTradedPrice: "18.5000",
-        previousClosePrice: "18.4000",
-        baseVolume: "100000",
-        highPrice: "18.6000",
-        lowPrice: "18.3000",
-        created: new Date().toISOString(),
-        changeFromPrevious: "0.54",
-      };
-    }
     return this.request<ValrMarketSummary>("GET", `/v1/public/${pair}/marketsummary`);
   }
 

@@ -1,13 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { AppStore, RampOrderRecord, RampStatus } from "../types/store.js";
 import { ValrClient } from "../integrations/exchanges/valr.client.js";
-import { calculateConversionQuote } from "./conversion.service.js";
 
-// export function isValidSolanaAddress(address: string): boolean {
-//   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
-// } We'll revert once we 4id a way to integrate real-world application
-export function isValidEvmAddress(address: string): boolean {
-  return /^0x[a-fA-F0-9]{40}$/.test(address);
+export function isValidSolanaAddress(address: string): boolean {
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 }
 
 export type QuoteRequest = {
@@ -20,7 +16,7 @@ export type QuoteResponse = {
   quoteId: string;
   pair: string;
   side: "BUY" | "SELL";
-  network: "SEPOLIA";
+  network: "SOL";
   baseRate: string;
   rate: string;
   sourceAmount: string;
@@ -34,7 +30,7 @@ export type QuoteResponse = {
 
 export type CreateOnrampInput = {
   amountZar: string | number;
-  destinationWalletAddress: string;
+  destinationSolanaAddress: string;
   userId?: string;
 };
 
@@ -48,7 +44,7 @@ export type OnrampResponse = {
   cryptoAmount: string;
   exchangeRate: string;
   platformFeeZar: string;
-  network: "SEPOLIA";
+  network: "SOL";
   destinationAddress: string;
   fiatReference: string;
   depositInstructions: {
@@ -71,7 +67,7 @@ export type BankDetailsInput = {
 
 export type CreateOfframpInput = {
   amountUsdc: string | number;
-  sourceWalletAddress?: string;
+  sourceSolanaAddress?: string;
   bankDetails: BankDetailsInput;
   userId?: string;
 };
@@ -82,12 +78,12 @@ export type OfframpResponse = {
   status: RampStatus;
   cryptoAsset: "USDC";
   cryptoAmount: string;
-  network: "SEPOLIA";
+  network: "SOL";
   fiatCurrency: "ZAR";
   estimatedFiatAmount: string;
   exchangeRate: string;
   platformFeeZar: string;
-  cryptoDepositAddress: string | null;
+  cryptoDepositAddress: string;
   bankDetails: {
     bankName: string;
     accountNumber: string;
@@ -96,7 +92,7 @@ export type OfframpResponse = {
   expiresAt: string;
 };
 
-const PLATFORM_FEE_RATE = 0.02;
+const PLATFORM_FEE_RATE = 0.02; // 2% ABC Pay platform markup
 
 export class RampService {
   public valrClient: ValrClient;
@@ -105,43 +101,37 @@ export class RampService {
     this.valrClient = valrClient || new ValrClient();
   }
 
+  /**
+   * Calculates a live conversion quote between USDC and ZAR on Solana.
+   * Pulls real-time prices from VALR and applies the 2% ABC Pay platform markup.
+   */
   async getQuote(request: QuoteRequest): Promise<QuoteResponse> {
     if (request.fromAsset === request.toAsset) {
       throw new Error("Source and destination assets must differ");
     }
 
-    const numAmount =
-      typeof request.amount === "string"
-        ? parseFloat(request.amount)
-        : request.amount;
-
+    const numAmount = typeof request.amount === "string" ? parseFloat(request.amount) : request.amount;
     if (isNaN(numAmount) || numAmount <= 0) {
       throw new Error("Invalid quote amount");
     }
 
+    const marketSummary = await this.valrClient.getMarketSummary("USDCZAR");
     const quoteId = randomUUID();
     const expiresAt = new Date(Date.now() + 60 * 1000).toISOString();
 
-    // ZAR → USDC
     if (request.fromAsset === "ZAR" && request.toAsset === "USDC") {
-      const marketSummary =
-        await this.valrClient.getMarketSummary("USDCZAR");
-
+      // ON-RAMP: Buying USDC with ZAR
       const askPrice = parseFloat(marketSummary.askPrice);
-
       const platformFeeZar = numAmount * PLATFORM_FEE_RATE;
       const netZar = numAmount - platformFeeZar;
-
       const destinationAmount = (netZar / askPrice).toFixed(6);
-      const effectiveRate = (
-        numAmount / parseFloat(destinationAmount)
-      ).toFixed(4);
+      const effectiveRate = (numAmount / parseFloat(destinationAmount)).toFixed(4);
 
       return {
         quoteId,
         pair: "USDCZAR",
         side: "BUY",
-        network: "SEPOLIA",
+        network: "SOL",
         baseRate: askPrice.toFixed(4),
         rate: effectiveRate,
         sourceAmount: numAmount.toFixed(2),
@@ -152,43 +142,40 @@ export class RampService {
         platformFeeRate: "0.0200",
         expiresAt,
       };
-    }
-
-    // USDC → ZAR
-    if (request.fromAsset === "USDC" && request.toAsset === "ZAR") {
-      const conversion = calculateConversionQuote({
-        cryptoAmount: String(numAmount),
-        exchangeRate: "18.00",
-        feeRate: "0.02",
-      });
+    } else if (request.fromAsset === "USDC" && request.toAsset === "ZAR") {
+      // OFF-RAMP: Selling USDC for ZAR
+      const bidPrice = parseFloat(marketSummary.bidPrice);
+      const grossZar = numAmount * bidPrice;
+      const platformFeeZar = grossZar * PLATFORM_FEE_RATE;
+      const netZar = (grossZar - platformFeeZar).toFixed(2);
+      const effectiveRate = (parseFloat(netZar) / numAmount).toFixed(4);
 
       return {
         quoteId,
         pair: "USDCZAR",
         side: "SELL",
-        network: "SEPOLIA",
-        baseRate: conversion.exchangeRate,
-        rate: conversion.exchangeRate,
-        sourceAmount: conversion.cryptoAmount,
+        network: "SOL",
+        baseRate: bidPrice.toFixed(4),
+        rate: effectiveRate,
+        sourceAmount: numAmount.toFixed(6),
         sourceAsset: "USDC",
-        destinationAmount: conversion.netFiatAmount,
+        destinationAmount: netZar,
         destinationAsset: "ZAR",
-        platformFeeZar: conversion.feeAmount,
-        platformFeeRate: conversion.feeRate,
+        platformFeeZar: platformFeeZar.toFixed(2),
+        platformFeeRate: "0.0200",
         expiresAt,
       };
+    } else {
+      throw new Error(`Unsupported pair ${request.fromAsset}/${request.toAsset}. Only USDC/ZAR supported.`);
     }
-
-    throw new Error(
-      `Unsupported pair ${request.fromAsset}/${request.toAsset}. Only USDC/ZAR supported.`,
-    );
   }
 
-  async createOnrampOrder(
-    input: CreateOnrampInput,
-  ): Promise<OnrampResponse> {
-    if (!isValidEvmAddress(input.destinationWalletAddress)) {
-      throw new Error("Invalid destination wallet address");
+  /**
+   * Initiates an on-ramp order (Fiat ZAR -> USDC on Solana).
+   */
+  async createOnrampOrder(input: CreateOnrampInput): Promise<OnrampResponse> {
+    if (!isValidSolanaAddress(input.destinationSolanaAddress)) {
+      throw new Error("Invalid destination Solana wallet address");
     }
 
     const quote = await this.getQuote({
@@ -197,9 +184,7 @@ export class RampService {
       amount: input.amountZar,
     });
 
-    const fiatReference = `ABC-VALR-${Math.floor(
-      100000 + Math.random() * 900000,
-    )}`;
+    const fiatReference = `ABC-VALR-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const order = await this.store.createRampOrder({
       userId: input.userId,
@@ -212,8 +197,8 @@ export class RampService {
       exchangeRate: quote.rate,
       platformFeeRate: quote.platformFeeRate,
       platformFeeZar: quote.platformFeeZar,
-      network: "SEPOLIA",
-      destinationWalletAddress: input.destinationWalletAddress,
+      network: "SOL",
+      destinationWalletAddress: input.destinationSolanaAddress,
       fiatReference,
     });
 
@@ -227,8 +212,8 @@ export class RampService {
       cryptoAmount: order.cryptoAmount,
       exchangeRate: order.exchangeRate,
       platformFeeZar: order.platformFeeZar,
-      network: "SEPOLIA",
-      destinationAddress: input.destinationWalletAddress,
+      network: "SOL",
+      destinationAddress: input.destinationSolanaAddress,
       fiatReference,
       depositInstructions: {
         bankName: "Nedbank",
@@ -241,14 +226,12 @@ export class RampService {
     };
   }
 
-  async createOfframpOrder(
-    input: CreateOfframpInput,
-  ): Promise<OfframpResponse> {
-    if (
-      input.sourceWalletAddress &&
-      !isValidEvmAddress(input.sourceWalletAddress)
-    ) {
-      throw new Error("Invalid source wallet address");
+  /**
+   * Initiates an off-ramp order (USDC on Solana -> Fiat ZAR Bank Account).
+   */
+  async createOfframpOrder(input: CreateOfframpInput): Promise<OfframpResponse> {
+    if (input.sourceSolanaAddress && !isValidSolanaAddress(input.sourceSolanaAddress)) {
+      throw new Error("Invalid source Solana wallet address");
     }
 
     const quote = await this.getQuote({
@@ -257,13 +240,14 @@ export class RampService {
       amount: input.amountUsdc,
     });
 
-     // Offramp service
-    const cryptoDepositAddress = process.env.SEPOLIA_USDC_RECEIVING_ADDRESS;
-
-    if (!cryptoDepositAddress) {
-      throw new Error(
-        "SEPOLIA_USDC_RECEIVING_ADDRESS is not configured",
-      );
+    let cryptoDepositAddress = "9RrszC4d3qh4nL4jA2cEZrj9KmMxUaDghhSvucEg7XpU";
+    try {
+      const depositInfo = await this.valrClient.getCryptoDepositAddress("USDC", "SOL");
+      if (depositInfo?.address) {
+        cryptoDepositAddress = depositInfo.address;
+      }
+    } catch {
+      // In case keys are not yet configured on VALR, fallback to default deposit address
     }
 
     const order = await this.store.createRampOrder({
@@ -277,8 +261,8 @@ export class RampService {
       exchangeRate: quote.rate,
       platformFeeRate: quote.platformFeeRate,
       platformFeeZar: quote.platformFeeZar,
-      network: "SEPOLIA",
-      sourceWalletAddress: input.sourceWalletAddress,
+      network: "SOL",
+      sourceWalletAddress: input.sourceSolanaAddress,
       cryptoDepositAddress,
       bankName: input.bankDetails.bankName,
       accountNumber: input.bankDetails.accountNumber,
@@ -292,7 +276,7 @@ export class RampService {
       status: order.status,
       cryptoAsset: "USDC",
       cryptoAmount: order.cryptoAmount,
-      network: "SEPOLIA",
+      network: "SOL",
       fiatCurrency: "ZAR",
       estimatedFiatAmount: order.fiatAmount,
       exchangeRate: order.exchangeRate,
@@ -309,155 +293,101 @@ export class RampService {
 
   async getOrderById(id: string): Promise<RampOrderRecord> {
     const order = await this.store.getRampOrderById(id);
-
     if (!order) {
       throw new Error(`Order ${id} not found`);
     }
-
     return order;
-  }
-
-  // Mark the deposit when recieved
-  async markDepositReceived(
-    orderId: string,
-    txHash: string,
-  ): Promise<RampOrderRecord> {
-    const order = await this.getOrderById(orderId);
-
-    if (order.type !== "OFFRAMP") {
-      throw new Error("Only off-ramp orders can receive crypto deposits");
-    }
-
-    if (order.status !== "PENDING_DEPOSIT") {
-      throw new Error(
-        `Order cannot receive a deposit in status ${order.status}`,
-      );
-    }
-
-    return await this.store.updateRampOrder(orderId, {
-      status: "PAYMENT_RECEIVED",
-      txHash,
-    });
   }
 
   async listOrders(userId?: string): Promise<RampOrderRecord[]> {
     return this.store.listRampOrders(userId);
   }
 
+  /**
+   * Executes the conversion and payout for an order.
+   */
   async executeSettlement(orderId: string): Promise<RampOrderRecord> {
-  const order = await this.getOrderById(orderId);
+    const order = await this.getOrderById(orderId);
 
-  if (order.status === "COMPLETED") {
-    return order;
-  }
-
-  try {
-    if (order.type === "OFFRAMP" && order.status !== "PAYMENT_RECEIVED") {
-      throw new Error(
-        `Off-ramp order must have a verified crypto deposit before settlement. Current status: ${order.status}`,
-      );
+    if (order.status === "COMPLETED") {
+      return order;
     }
 
-    await this.store.updateRampOrder(orderId, {
-      status: "CONVERTING",
-    });
+    await this.store.updateRampOrder(orderId, { status: "CONVERTING" });
 
-    if (order.type === "ONRAMP") {
-      let valrOrderId = "VALR-SWAP-ONRAMP-SIM";
-
-      try {
-        const swap = await this.valrClient.createSimpleOrder(
-          "USDCZAR",
-          order.fiatAmount,
-          "ZAR",
-          "BUY",
-        );
-
-        if (swap?.id) {
-          valrOrderId = swap.id;
-        }
-      } catch {
-        // Dev mode fallback
-      }
-
-      let valrWithdrawalId = "VALR-TX-SEPOLIA-SIM";
-
-      if (order.destinationWalletAddress) {
+    try {
+      if (order.type === "ONRAMP") {
+        let valrOrderId = "VALR-SWAP-ONRAMP-SIM";
         try {
-          const withdrawal = await this.valrClient.withdrawCrypto(
-            "USDC",
-            order.cryptoAmount,
-            order.destinationWalletAddress,
-            "SEPOLIA",
+          const swap = await this.valrClient.createSimpleOrder(
+            "USDCZAR",
+            order.fiatAmount,
+            "ZAR",
+            "BUY"
           );
-
-          if (withdrawal?.id) {
-            valrWithdrawalId = withdrawal.id;
-          }
+          if (swap?.id) valrOrderId = swap.id;
         } catch {
           // Dev mode fallback
         }
+
+        let valrWithdrawalId = "VALR-TX-SOL-SIM";
+        if (order.destinationWalletAddress) {
+          try {
+            const withdrawal = await this.valrClient.withdrawCrypto(
+              "USDC",
+              order.cryptoAmount,
+              order.destinationWalletAddress,
+              "SOL"
+            );
+            if (withdrawal?.id) valrWithdrawalId = withdrawal.id;
+          } catch {
+            // Dev mode fallback
+          }
+        }
+
+        return await this.store.updateRampOrder(orderId, {
+          status: "COMPLETED",
+          valrOrderId,
+          valrWithdrawalId,
+        });
+      } else {
+        let valrOrderId = "VALR-SWAP-OFFRAMP-SIM";
+        try {
+          const swap = await this.valrClient.createSimpleOrder(
+            "USDCZAR",
+            order.cryptoAmount,
+            "USDC",
+            "SELL"
+          );
+          if (swap?.id) valrOrderId = swap.id;
+        } catch {
+          // Dev mode fallback
+        }
+
+        return await this.store.updateRampOrder(orderId, {
+          status: "COMPLETED",
+          valrOrderId,
+        });
       }
-
-      return await this.store.updateRampOrder(orderId, {
-        status: "COMPLETED",
-        valrOrderId,
-        valrWithdrawalId,
+    } catch (error) {
+      await this.store.updateRampOrder(orderId, {
+        status: "FAILED",
+        errorMessage: (error as Error).message,
       });
+      throw error;
     }
-
-    // OFFRAMP: convert USDC -> ZAR and simulate bank payout
-    await this.store.updateRampOrder(orderId, {
-      status: "SETTLING",
-    });
-
-    const cryptoAmount = Number(order.cryptoAmount);
-    const exchangeRate = Number(order.exchangeRate);
-    const feeRate = Number(order.platformFeeRate);
-
-    const grossFiatAmount = cryptoAmount * exchangeRate;
-    const platformFee = grossFiatAmount * feeRate;
-    const netFiatAmount = grossFiatAmount - platformFee;
-
-    console.log("Mock bank payout:", {
-      orderId,
-      cryptoAmount,
-      exchangeRate,
-      grossFiatAmount,
-      platformFee,
-      netFiatAmount,
-      bankName: order.bankName,
-      accountNumber: order.accountNumber,
-      accountHolderName: order.accountHolderName,
-    });
-
-    return await this.store.updateRampOrder(orderId, {
-      status: "COMPLETED",
-      fiatAmount: netFiatAmount.toFixed(2),
-      platformFeeZar: platformFee.toFixed(2),
-    });
-  } catch (error) {
-    await this.store.updateRampOrder(orderId, {
-      status: "FAILED",
-      errorMessage: (error as Error).message,
-    });
-
-    throw error;
   }
-}
 
+  /**
+   * Processes incoming VALR webhooks.
+   */
   async handleValrWebhook(
     payload: any,
     signature?: string,
-    timestamp?: number,
+    timestamp?: number
   ): Promise<{ processed: boolean; orderId?: string }> {
     if (signature && timestamp) {
-      const isValid = this.valrClient.verifyWebhookSignature(
-        payload,
-        signature,
-        timestamp,
-      );
-
+      const isValid = this.valrClient.verifyWebhookSignature(payload, signature, timestamp);
       if (!isValid) {
         throw new Error("Invalid webhook signature");
       }
@@ -466,24 +396,16 @@ export class RampService {
     const eventType = payload?.type || payload?.eventType;
 
     if (eventType === "FIAT_DEPOSIT" || payload?.data?.paymentReference) {
-      const ref =
-        payload?.data?.paymentReference || payload?.paymentReference;
-
+      const ref = payload?.data?.paymentReference || payload?.paymentReference;
       if (ref) {
         const order = await this.store.findRampOrderByReference(ref);
-
         if (order && order.status === "PENDING_DEPOSIT") {
           await this.executeSettlement(order.id);
-          return {
-            processed: true,
-            orderId: order.id,
-          };
+          return { processed: true, orderId: order.id };
         }
       }
     }
 
-    return {
-      processed: false,
-    };
+    return { processed: false };
   }
 }

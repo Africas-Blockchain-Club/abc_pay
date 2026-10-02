@@ -1,0 +1,54 @@
+.page { min-height: 100vh; background: #102445; color: #f8fafc; font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif; }
+.shell { width: min(100%, 1240px); margin: 0 auto; padding: 24px 28px 36px; }
+.header, .intro, .conversionHeading, .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.header { min-height: 52px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: #f8fafc; font-size: 14px; font-weight: 800; text-decoration: none; }
+.mark { position: relative; display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid rgba(255, 255, 255, 0.16); background: #111722; font-size: 10px; letter-spacing: -0.04em; }
+.mark::after { position: absolute; right: -3px; bottom: -3px; width: 6px; height: 6px; background: #f45a00; content: ""; }
+.headerStatus, .accountUnavailable { margin: 0; color: #a4aec1; font-size: 12px; }
+.intro { padding: 46px 0 30px; }
+.eyebrow { margin: 0; color: #a4aec1; font-size: 10px; font-weight: 800; letter-spacing: 0.15em; line-height: 1.5; text-transform: uppercase; }
+.intro h1, .conversionHeading h2, .walletCard h2, .sectionHeading h2 { margin: 7px 0 0; letter-spacing: -0.04em; line-height: 1.1; }
+.intro h1 { font-size: clamp(30px, 4vw, 44px); }
+.accountUnavailable { padding: 9px 11px; border: 1px solid rgba(255, 255, 255, 0.12); }
+.layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .8fr); align-items: start; gap: 22px; }
+.workspace, .walletCard, .transactions { border: 1px solid rgba(255, 255, 255, 0.12); background: #111722; }
+.tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+.tab { position: relative; min-height: 62px; border: 0; border-right: 1px solid rgba(255, 255, 255, 0.12); border-radius: 0; background: transparent; color: #a4aec1; font-size: 12px; font-weight: 800; text-align: left; padding: 0 22px; }
+.tab:last-child { border-right: 0; }
+.tab[aria-selected="true"] { color: #f8fafc; background: #161c28; }
+.tab[aria-selected="true"]::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 3px; background: #f45a00; content: ""; }
+.tab:focus-visible, .primaryAction:focus-visible, .secondaryActions button:focus-visible, .brand:focus-visible { outline: 3px solid rgba(244, 90, 0, 0.7); outline-offset: -3px; }
+.conversion { padding: 30px; }
+.conversionHeading { align-items: flex-start; }
+.conversionHeading h2, .walletCard h2, .sectionHeading h2 { font-size: 23px; }
+.quoteStatus { flex: none; padding: 7px 9px; border: 1px solid rgba(244, 90, 0, 0.5); color: #ff9a61; font-size: 11px; font-weight: 800; }
+.description { margin: 16px 0 0; color: #a4aec1; font-size: 13px; line-height: 1.65; }
+.amounts { margin-top: 27px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+.amountRow { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; min-height: 72px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); color: #a4aec1; font-size: 12px; }
+.amountRow strong { color: #f8fafc; font-size: 14px; }
+.amountRow span:last-child { min-width: 42px; color: #f8fafc; font-size: 11px; font-weight: 800; text-align: right; }
+.details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+.details div { min-width: 0; padding: 18px 12px 18px 0; }
+.details div + div { padding-left: 12px; border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.details dt { color: #a4aec1; font-size: 11px; }
+.details dd { margin: 7px 0 0; color: #f8fafc; font-size: 11px; font-weight: 700; line-height: 1.45; }
+.conversionActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+.primaryAction, .confirmationAction { width: 100%; min-height: 50px; border-radius: 0; cursor: not-allowed; font-size: 12px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; opacity: .55; }
+.primaryAction { border: 0; background: #f45a00; color: #102445; }
+.confirmationAction { border: 1px solid rgba(255, 255, 255, 0.18); background: transparent; color: #a4aec1; }
+.integrationNote { margin: 12px 0 0; color: #a4aec1; font-size: 11px; line-height: 1.5; }
+.sidebar { display: grid; gap: 22px; }
+.walletCard, .transactions { padding: 25px; }
+.balance { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 25px; padding: 15px 0; border-top: 1px solid rgba(255, 255, 255, 0.12); border-bottom: 1px solid rgba(255, 255, 255, 0.12); color: #a4aec1; font-size: 12px; }
+.balance strong { color: #f8fafc; font-size: 16px; }
+.secondaryActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.secondaryActions button { min-height: 42px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 0; background: transparent; color: #a4aec1; cursor: not-allowed; font-size: 11px; font-weight: 800; }
+.sectionHeading { align-items: end; }
+.emptyState { margin-top: 19px; padding: 20px 0 2px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+.emptyState p { margin: 0; color: #f8fafc; font-size: 14px; font-weight: 800; }
+.emptyState span { display: block; margin-top: 7px; color: #a4aec1; font-size: 12px; line-height: 1.6; }
+.footer { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.12); color: #a4aec1; font-size: 11px; }
+
+@media (max-width: 800px) { .shell { padding: 18px 16px 28px; } .intro { padding: 34px 0 24px; } .layout { grid-template-columns: 1fr; } .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .headerStatus { display: none; } .intro { align-items: start; flex-direction: column; gap: 16px; } .conversion, .walletCard, .transactions { padding: 21px; } .tab { min-height: 58px; padding: 0 14px; font-size: 11px; } .conversionHeading { align-items: start; flex-direction: column; gap: 14px; } .details { grid-template-columns: 1fr; } .details div, .details div + div { padding: 13px 0; border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); } .details div:last-child { border-bottom: 0; } .conversionActions, .sidebar { grid-template-columns: 1fr; gap: 16px; } }

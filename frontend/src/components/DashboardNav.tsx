@@ -10,7 +10,6 @@ const links = [
   { href: "/wallet", label: "Wallet" },
   { href: "/scan", label: "Scan & pay" },
   { href: "/payments", label: "Payments" },
-  { href: "/offramp", label: "Convert to ZAR" },
   { href: "/merchant/qr-generate", label: "Merchant QR" },
 ];
 

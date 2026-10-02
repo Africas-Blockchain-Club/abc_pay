@@ -3,12 +3,9 @@ import { getUsdcBalance } from "../services/usdc.service.js";
 import type {
   AppStore,
   BankAccountRecord,
-  ConfirmPaymentInput,
   CreateBankAccountInput,
-  CreatePaymentRequestInput,
   CreateRampOrderInput,
   CreateUserInput,
-  PaymentRequestRecord,
   RampOrderRecord,
   RampStatus,
   RampType,
@@ -16,8 +13,6 @@ import type {
   UserRecord,
   WalletRecord,
 } from "../types/store.js";
-import { randomUUID } from "node:crypto";
-
 import { Prisma } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
@@ -212,7 +207,7 @@ export class PrismaStore implements AppStore {
         exchangeRate: new Decimal(input.exchangeRate),
         platformFeeRate: input.platformFeeRate ? new Decimal(input.platformFeeRate) : new Decimal(0.02),
         platformFeeZar: new Decimal(input.platformFeeZar),
-        network: input.network ?? "SEPOLIA",
+        network: input.network ?? "SOL",
         destinationWalletAddress: input.destinationWalletAddress,
         sourceWalletAddress: input.sourceWalletAddress,
         cryptoDepositAddress: input.cryptoDepositAddress,
@@ -237,24 +232,20 @@ export class PrismaStore implements AppStore {
   }
 
   async updateRampOrder(id: string, updates: UpdateRampOrderInput): Promise<RampOrderRecord> {
-  const data: Prisma.RampOrderUpdateInput = {};
+    const data: Prisma.RampOrderUpdateInput = {};
+    if (updates.status !== undefined) data.status = updates.status;
+    if (updates.cryptoDepositAddress !== undefined) data.cryptoDepositAddress = updates.cryptoDepositAddress;
+    if (updates.txHash !== undefined) data.txHash = updates.txHash;
+    if (updates.valrOrderId !== undefined) data.valrOrderId = updates.valrOrderId;
+    if (updates.valrWithdrawalId !== undefined) data.valrWithdrawalId = updates.valrWithdrawalId;
+    if (updates.errorMessage !== undefined) data.errorMessage = updates.errorMessage;
 
-  if (updates.status !== undefined) data.status = updates.status;
-  if (updates.fiatAmount !== undefined) data.fiatAmount = updates.fiatAmount;
-  if (updates.platformFeeZar !== undefined) data.platformFeeZar = updates.platformFeeZar;
-  if (updates.cryptoDepositAddress !== undefined) data.cryptoDepositAddress = updates.cryptoDepositAddress;
-  if (updates.txHash !== undefined) data.txHash = updates.txHash;
-  if (updates.valrOrderId !== undefined) data.valrOrderId = updates.valrOrderId;
-  if (updates.valrWithdrawalId !== undefined) data.valrWithdrawalId = updates.valrWithdrawalId;
-  if (updates.errorMessage !== undefined) data.errorMessage = updates.errorMessage;
-
-  const order = await prisma.rampOrder.update({
-    where: { id },
-    data,
-  });
-
-  return mapRampOrder(order);
-}
+    const order = await prisma.rampOrder.update({
+      where: { id },
+      data,
+    });
+    return mapRampOrder(order);
+  }
 
   async listRampOrders(userId?: string): Promise<RampOrderRecord[]> {
     const where: Prisma.RampOrderWhereInput = {};
@@ -287,96 +278,4 @@ export class PrismaStore implements AppStore {
     });
     return account ? mapBankAccount(account) : null;
   }
-
-  private paymentRequests = new Map<string, PaymentRequestRecord>();
-
-  async createPaymentRequest(input: CreatePaymentRequestInput): Promise<PaymentRequestRecord> {
-    const now = new Date();
-    const request: PaymentRequestRecord = {
-      id: `abc_pay_req_${randomUUID().slice(0, 8)}`,
-      userId: input.userId,
-      userName: input.userName,
-      recipientAddress: input.recipientAddress,
-      amountUsdc: input.amountUsdc,
-      amountZar: input.amountZar ?? null,
-      network: input.network ?? "SEPOLIA",
-      token: input.token ?? "USDC",
-      tokenAddress: input.tokenAddress ?? "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-      description: input.description ?? null,
-      status: "PENDING",
-      txHash: null,
-      payerAddress: null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.paymentRequests.set(request.id, request);
-    return request;
-  }
-
-  async getPaymentRequestById(id: string): Promise<PaymentRequestRecord | null> {
-    return this.paymentRequests.get(id) ?? null;
-  }
-
-  async confirmPaymentRequest(id: string, updates: ConfirmPaymentInput): Promise<PaymentRequestRecord> {
-    const req = this.paymentRequests.get(id);
-    if (!req) {
-      throw new Error(`Payment request ${id} not found`);
-    }
-
-    const updated: PaymentRequestRecord = {
-      ...req,
-      status: "CONFIRMED",
-      txHash: updates.txHash,
-      payerAddress: updates.payerAddress,
-      amountUsdc: updates.amountUsdc ?? req.amountUsdc,
-      updatedAt: new Date(),
-    };
-    this.paymentRequests.set(id, updated);
-
-    // Persist to Prisma Transaction table so it's recorded permanently in PostgreSQL
-    try {
-      await prisma.transaction.create({
-        data: {
-          userId: req.userId,
-          direction: "RECEIVE",
-          status: "CONFIRMED",
-          fiatAmount: new Decimal(req.amountZar || 0),
-          fiatCurrency: "ZAR",
-          cryptoAmount: new Decimal(updates.amountUsdc || req.amountUsdc),
-          cryptoAsset: "USDC",
-          chain: req.network,
-          valrMarketRate: new Decimal(18.5),
-          markupBps: 200,
-          finalRate: new Decimal(18.5),
-          depositTxHash: updates.txHash,
-          payoutRef: updates.payerAddress,
-        },
-      });
-    } catch (err) {
-      console.warn("Could not insert transaction row in PostgreSQL:", (err as Error).message);
-    }
-
-    // Refresh wallet balance from blockchain
-    try {
-      const wallet = await prisma.wallet.findUnique({ where: { userId: req.userId } });
-      if (wallet && wallet.publicAddress) {
-        const liveBalance = await getUsdcBalance(wallet.publicAddress);
-        await prisma.wallet.update({
-          where: { id: wallet.id },
-          data: { balanceCached: new Decimal(liveBalance) },
-        });
-      }
-    } catch (err) {
-      console.warn("Could not refresh wallet balance cache:", (err as Error).message);
-    }
-
-    return updated;
-  }
-
-  async listPaymentRequests(userId: string): Promise<PaymentRequestRecord[]> {
-    return [...this.paymentRequests.values()]
-      .filter((r) => r.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
 }
-
