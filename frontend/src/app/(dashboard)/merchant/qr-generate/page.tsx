@@ -368,7 +368,6 @@ export default function MerchantQrPage() {
                 </div>
               ) : (
                 <div style={{ background: "rgba(234, 179, 8, 0.15)", border: "1px solid #eab308", borderRadius: "9999px", padding: "0.35rem 0.85rem", color: "#facc15", fontSize: "0.8rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#facc15" }} />
                   WAITING FOR PAYMENT...
                 </div>
               )}
