@@ -317,7 +317,7 @@ button, input { font: inherit; }
   .abcAuthSwitch button { border:0; background:transparent; color:#d45404; font-weight:800; cursor:pointer; }
 
   .dashboard { min-height:100vh; display:block; background:#08111f; color:#f4f7fb; }
-  .dashboard .main { width:min(1240px,calc(100% - 56px)); margin:0 auto; padding:56px 0; }
+  .dashboard .main { width:min(1240px,calc(100% - 56px)); margin: 0 auto; padding:56px 0; }
   .abcDashHeader { position:relative; display:flex; align-items:center; gap:50px; min-height:82px; padding:0 max(28px,calc((100vw - 1240px)/2)); border-bottom:1px solid #ffffff16; }
   .abcDashBrand { display:flex; align-items:center; gap:10px; flex-shrink:0; }
   .abcDashBrand img { object-fit:contain; }
