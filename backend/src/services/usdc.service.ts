@@ -127,13 +127,14 @@ export type TransferVerificationResult = {
 export async function verifyUsdcTransfer(
   txHash: string,
   expectedRecipient: string,
-  expectedAmount?: string
+  expectedAmount?: string,
+  expectedSender?: string,
 ): Promise<TransferVerificationResult> {
   // Allow simulated / test hash for offline testing
   if (txHash.startsWith("mock_") || txHash.startsWith("sim_")) {
     return {
       verified: true,
-      from: "0x1111111111111111111111111111111111111111",
+      from: expectedSender ?? "0x1111111111111111111111111111111111111111",
       to: expectedRecipient,
       amount: expectedAmount ?? "0.00",
       blockNumber: "1",
@@ -148,13 +149,16 @@ export async function verifyUsdcTransfer(
     });
 
     if (receipt.status !== "success") {
-      return { verified: false, reason: "Transaction status reverted or failed on Sepolia" };
+      return {
+        verified: false,
+        reason: "Transaction status reverted or failed on Sepolia",
+      };
     }
 
     const decimals = await getUsdcDecimals();
 
-    // Scan transaction logs for the ERC-20 Transfer event to expectedRecipient
     for (const log of receipt.logs) {
+      // Only inspect logs emitted by the configured USDC contract.
       if (log.address.toLowerCase() !== USDC_ADDRESS.toLowerCase()) {
         continue;
       }
@@ -167,27 +171,75 @@ export async function verifyUsdcTransfer(
           topics: log.topics,
         });
 
+        if (!decoded.args) {
+          continue;
+        }
+
+        const sender = decoded.args.from;
+        const recipient = decoded.args.to;
+        const transferredAmount = formatUnits(
+          decoded.args.value,
+          decimals,
+        );
+
+        // Check recipient.
+        if (recipient.toLowerCase() !== expectedRecipient.toLowerCase()) {
+          continue;
+        }
+
+        // Check sender if the order supplied one.
         if (
-          decoded.args &&
-          decoded.args.to.toLowerCase() === expectedRecipient.toLowerCase()
+          expectedSender &&
+          sender.toLowerCase() !== expectedSender.toLowerCase()
         ) {
-          const transferredAmount = formatUnits(decoded.args.value, decimals);
           return {
-            verified: true,
-            from: decoded.args.from,
-            to: decoded.args.to,
+            verified: false,
+            from: sender,
+            to: recipient,
             amount: transferredAmount,
             blockNumber: receipt.blockNumber.toString(),
+            reason: `USDC was sent by ${sender}, but the order expects ${expectedSender}`,
           };
         }
+
+        // Check amount if the order supplied one.
+        if (expectedAmount !== undefined) {
+          const requiredAmount = Number(expectedAmount);
+          const actualAmount = Number(transferredAmount);
+
+          if (
+            Number.isNaN(requiredAmount) ||
+            Number.isNaN(actualAmount) ||
+            actualAmount < requiredAmount
+          ) {
+            return {
+              verified: false,
+              from: sender,
+              to: recipient,
+              amount: transferredAmount,
+              blockNumber: receipt.blockNumber.toString(),
+              reason: `Insufficient USDC amount. Required ${expectedAmount} USDC but received ${transferredAmount} USDC`,
+            };
+          }
+        }
+
+        return {
+          verified: true,
+          from: sender,
+          to: recipient,
+          amount: transferredAmount,
+          blockNumber: receipt.blockNumber.toString(),
+        };
       } catch {
-        // Log was not an ERC-20 Transfer event, skip
+        // Not a Transfer event we can decode. Continue scanning logs.
       }
     }
 
     return {
       verified: false,
-      reason: `No Transfer event to recipient ${expectedRecipient} found in transaction logs for USDC contract ${USDC_ADDRESS}`,
+      reason:
+        `No valid USDC Transfer event to recipient ${expectedRecipient} ` +
+        `found in transaction logs for USDC contract ${USDC_ADDRESS}`,
     };
   } catch (error) {
     return {
