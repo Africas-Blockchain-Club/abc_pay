@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { isValidEvmAddress, RampService } from "../services/ramp.service.js";
+// Verification endpoint
+import { verifyUsdcTransfer } from "../services/usdc.service.js";
 
 const quoteSchema = z.object({
   fromAsset: z.enum(["ZAR", "USDC"]),
@@ -16,7 +18,7 @@ const onrampSchema = z.object({
     const num = typeof val === "string" ? parseFloat(val) : val;
     return !isNaN(num) && num >= 50;
   }, "Minimum on-ramp amount is R50.00"),
-  destinationSolanaAddress: z
+  destinationWalletAddress: z
     .string()
     .trim()
     .refine(isValidEvmAddress, "Must be a valid Base58 Solana wallet address"),
@@ -28,7 +30,7 @@ const offrampSchema = z.object({
     const num = typeof val === "string" ? parseFloat(val) : val;
     return !isNaN(num) && num >= 5;
   }, "Minimum off-ramp amount is 5.00 USDC"),
-  sourceSolanaAddress: z
+  sourceWalletAddress: z
     .string()
     .trim()
     .optional()
@@ -81,7 +83,7 @@ export function createRampRouter(rampService: RampService): Router {
       const parsed = onrampSchema.parse(req.body);
       const order = await rampService.createOnrampOrder({
         amountZar: parsed.amountZar,
-        destinationWalletAddress: parsed.destinationSolanaAddress,
+        destinationWalletAddress: parsed.destinationWalletAddress,
         userId: parsed.userId,
       });
       res.status(201).json(order);
@@ -107,7 +109,7 @@ export function createRampRouter(rampService: RampService): Router {
       const parsed = offrampSchema.parse(req.body);
       const order = await rampService.createOfframpOrder({
         amountUsdc: parsed.amountUsdc,
-        sourceWalletAddress: parsed.sourceSolanaAddress,
+        sourceWalletAddress: parsed.sourceWalletAddress,
         bankDetails: parsed.bankDetails,
         userId: parsed.userId,
       });
@@ -156,6 +158,90 @@ export function createRampRouter(rampService: RampService): Router {
         res.status(400).json({ message: error.message });
         return;
       }
+      next(error);
+    }
+  });
+
+  /**
+ * POST /api/v1/ramp/orders/:id/verify-deposit
+ *
+ * Verifies a Sepolia USDC transaction against the existing off-ramp order.
+ */
+  router.post("/orders/:id/verify-deposit", async (req, res, next) => {
+    try {
+      const txHashSchema = z.object({
+        txHash: z
+          .string()
+          .trim()
+          .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid Ethereum transaction hash"),
+      });
+
+      const parsed = txHashSchema.parse(req.body);
+
+      const order = await rampService.getOrderById(req.params.id);
+
+      if (order.type !== "OFFRAMP") {
+        res.status(400).json({
+          message: "Only off-ramp orders can receive USDC deposits",
+        });
+        return;
+      }
+
+      if (order.status !== "PENDING_DEPOSIT") {
+        res.status(400).json({
+          message: `Order cannot receive a deposit in status ${order.status}`,
+        });
+        return;
+      }
+
+      if (!order.cryptoDepositAddress) {
+        res.status(400).json({
+          message: "Order does not have a crypto deposit address",
+        });
+        return;
+      }
+
+      const verification = await verifyUsdcTransfer(
+        parsed.txHash,
+        order.cryptoDepositAddress,
+        order.cryptoAmount,
+        order.sourceWalletAddress ?? undefined,
+      );
+
+      if (!verification.verified) {
+        res.status(400).json({
+          message: "USDC deposit could not be verified",
+          verification,
+        });
+        return;
+      }
+
+      const updatedOrder = await rampService.markDepositReceived(
+        order.id,
+        parsed.txHash,
+      );
+
+      res.json({
+        message: "USDC deposit verified successfully",
+        verification,
+        order: updatedOrder,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          message: "Invalid transaction verification request",
+          errors: error.issues,
+        });
+        return;
+      }
+
+      if (error instanceof Error) {
+        res.status(400).json({
+          message: error.message,
+        });
+        return;
+      }
+
       next(error);
     }
   });

@@ -317,6 +317,29 @@ export class RampService {
     return order;
   }
 
+  // Mark the deposit when recieved
+  async markDepositReceived(
+    orderId: string,
+    txHash: string,
+  ): Promise<RampOrderRecord> {
+    const order = await this.getOrderById(orderId);
+
+    if (order.type !== "OFFRAMP") {
+      throw new Error("Only off-ramp orders can receive crypto deposits");
+    }
+
+    if (order.status !== "PENDING_DEPOSIT") {
+      throw new Error(
+        `Order cannot receive a deposit in status ${order.status}`,
+      );
+    }
+
+    return await this.store.updateRampOrder(orderId, {
+      status: "PAYMENT_RECEIVED",
+      txHash,
+    });
+  }
+
   async listOrders(userId?: string): Promise<RampOrderRecord[]> {
     return this.store.listRampOrders(userId);
   }
