@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { isValidSolanaAddress, RampService } from "../services/ramp.service.js";
+import { isValidEvmAddress, RampService } from "../services/ramp.service.js";
 
 const quoteSchema = z.object({
   fromAsset: z.enum(["ZAR", "USDC"]),
@@ -19,7 +19,7 @@ const onrampSchema = z.object({
   destinationSolanaAddress: z
     .string()
     .trim()
-    .refine(isValidSolanaAddress, "Must be a valid Base58 Solana wallet address"),
+    .refine(isValidEvmAddress, "Must be a valid Base58 Solana wallet address"),
   userId: z.string().optional(),
 });
 
@@ -32,7 +32,7 @@ const offrampSchema = z.object({
     .string()
     .trim()
     .optional()
-    .refine((val) => !val || isValidSolanaAddress(val), "Invalid source Solana wallet address"),
+    .refine((val) => !val || isValidEvmAddress(val), "Invalid source Solana wallet address"),
   bankDetails: z.object({
     bankName: z.string().trim().min(2, "Bank name required"),
     accountNumber: z.string().trim().min(5, "Valid account number required"),
@@ -81,7 +81,7 @@ export function createRampRouter(rampService: RampService): Router {
       const parsed = onrampSchema.parse(req.body);
       const order = await rampService.createOnrampOrder({
         amountZar: parsed.amountZar,
-        destinationSolanaAddress: parsed.destinationSolanaAddress,
+        destinationWalletAddress: parsed.destinationSolanaAddress,
         userId: parsed.userId,
       });
       res.status(201).json(order);
@@ -107,7 +107,7 @@ export function createRampRouter(rampService: RampService): Router {
       const parsed = offrampSchema.parse(req.body);
       const order = await rampService.createOfframpOrder({
         amountUsdc: parsed.amountUsdc,
-        sourceSolanaAddress: parsed.sourceSolanaAddress,
+        sourceWalletAddress: parsed.sourceSolanaAddress,
         bankDetails: parsed.bankDetails,
         userId: parsed.userId,
       });
