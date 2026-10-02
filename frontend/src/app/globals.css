@@ -317,7 +317,7 @@ button, input { font: inherit; }
   .abcAuthSwitch button { border:0; background:transparent; color:#d45404; font-weight:800; cursor:pointer; }
 
   .dashboard { min-height:100vh; display:block; background:#08111f; color:#f4f7fb; }
-  .dashboard .main { width:min(1240px,calc(100% - 56px)); margin: 0 auto; padding:56px 0; }
+  .dashboard .main { width:min(1240px,calc(100% - 56px)); margin:0 auto; padding:56px 0; }
   .abcDashHeader { position:relative; display:flex; align-items:center; gap:50px; min-height:82px; padding:0 max(28px,calc((100vw - 1240px)/2)); border-bottom:1px solid #ffffff16; }
   .abcDashBrand { display:flex; align-items:center; gap:10px; flex-shrink:0; }
   .abcDashBrand img { object-fit:contain; }
@@ -399,105 +399,4 @@ button, input { font: inherit; }
     .abcAuthDialog { padding:28px 22px; }
     .abcAuthNameRow { grid-template-columns:1fr; }
   }
-
-  /* Off-ramp / Convert to ZAR Styles */
-  .abcOfframp { width: 100%; max-width: 980px; margin: 0 auto; }
-  .abcOfframpHeader { margin-bottom: 28px; }
-  .abcOfframpKicker { color: #f45b05; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-  .abcOfframpTitle { margin: 8px 0 0; color: #fff; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
-  .abcOfframpSubtitle { margin: 8px 0 0; color: #91a2b7; font-size: 13px; line-height: 1.5; }
-
-  .abcOfframpSteps { display: flex; gap: 8px; margin: 24px 0 32px; overflow-x: auto; padding-bottom: 4px; }
-  .abcOfframpStep { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid #27364a; border-radius: 9999px; background: #101c2d; color: #7186a4; font-size: 12px; font-weight: 700; white-space: nowrap; }
-  .abcOfframpStep.active { border-color: #f45b05; background: #f45b051a; color: #f45b05; }
-  .abcOfframpStep.done { border-color: #36d5a0; background: #36d5a015; color: #36d5a0; }
-  .abcOfframpStepNum { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #27364a; color: #fff; font-size: 10px; font-weight: 800; }
-  .abcOfframpStep.active .abcOfframpStepNum { background: #f45b05; color: #fff; }
-  .abcOfframpStep.done .abcOfframpStepNum { background: #36d5a0; color: #08111f; }
-
-  .abcOfframpCard { padding: 24px 28px; border: 1px solid #27364a; border-radius: 16px; background: #101c2d; color: #f4f7fb; margin-bottom: 24px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25); }
-  .abcOfframpCardHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #27364a; }
-  .abcOfframpCardHeader h2 { margin: 0; font-size: 18px; font-weight: 700; color: #fff; }
-  .abcOfframpBadge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  .abcOfframpBadge.info { background: #27364a; color: #91a2b7; }
-  .abcOfframpBadge.warning { background: #eab30822; border: 1px solid #eab308; color: #facc15; }
-  .abcOfframpBadge.success { background: #22c55e22; border: 1px solid #22c55e; color: #4ade80; }
-
-  .abcOfframpGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .abcOfframpFull { grid-column: 1 / -1; }
-  .abcOfframpField { display: grid; gap: 6px; }
-  .abcOfframpField label { font-size: 12px; font-weight: 700; color: #cbd5e1; }
-  .abcOfframpField small { font-size: 11px; color: #7186a4; }
-  .abcOfframpInput, .abcOfframpSelect { width: 100%; padding: 11px 14px; border: 1px solid #2b3b50; border-radius: 10px; background: #08111f; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s; }
-  .abcOfframpInput:focus, .abcOfframpSelect:focus { border-color: #f45b05; }
-  .abcOfframpInput::placeholder { color: #536275; }
-
-  .abcOfframpPills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .abcOfframpPill { padding: 5px 12px; border: 1px solid #27364a; border-radius: 8px; background: #08111f; color: #91a2b7; font-size: 11px; font-weight: 700; cursor: pointer; }
-  .abcOfframpPill:hover, .abcOfframpPill.active { border-color: #f45b05; color: #f45b05; background: #f45b0510; }
-
-  .abcOfframpBtnRow { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
-  .abcOfframpBtnPrimary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border: 0; border-radius: 10px; background: #f45b05; color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px #f45b0524; }
-  .abcOfframpBtnPrimary:hover:not(:disabled) { background: #d45004; }
-  .abcOfframpBtnPrimary:disabled { opacity: 0.6; cursor: not-allowed; }
-  .abcOfframpBtnSecondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border: 1px solid #27364a; border-radius: 10px; background: #152234; color: #cbd5e1; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .abcOfframpBtnSecondary:hover:not(:disabled) { border-color: #536275; background: #1c2c42; color: #fff; }
-  .abcOfframpBtnSecondary:disabled { opacity: 0.6; cursor: not-allowed; }
-  .abcOfframpBtnSuccess { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border: 0; border-radius: 10px; background: #099875; color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; }
-  .abcOfframpBtnSuccess:hover:not(:disabled) { background: #088163; }
-
-  .abcOfframpQuoteCard { background: #0c1626; border: 1px solid #293d56; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
-  .abcOfframpQuoteGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .abcOfframpQuoteItem { padding: 14px 16px; border-radius: 10px; background: #101c2d; border: 1px solid #223044; }
-  .abcOfframpQuoteItem span { display: block; font-size: 11px; color: #7186a4; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-  .abcOfframpQuoteItem strong { font-size: 15px; color: #fff; }
-  .abcOfframpQuotePayout { padding: 18px 20px; border-radius: 12px; background: #071f1e; border: 1px solid #0e564d; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .abcOfframpQuotePayout span { font-size: 12px; color: #34d399; font-weight: 700; text-transform: uppercase; }
-  .abcOfframpQuotePayout strong { font-size: 26px; color: #34d399; font-weight: 800; }
-
-  .abcOfframpCopyBox { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border: 1px solid #27364a; border-radius: 10px; background: #08111f; font-family: monospace; font-size: 12px; word-break: break-all; color: #e2e8f0; margin-top: 8px; }
-  .abcOfframpCopyBtn { padding: 6px 12px; border: 1px solid #27364a; border-radius: 6px; background: #101c2d; color: #38bdf8; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; margin-left: 12px; flex-shrink: 0; }
-  .abcOfframpCopyBtn:hover { border-color: #38bdf8; background: #162438; }
-
-  .abcOfframpAlert { padding: 14px 16px; border-radius: 10px; font-size: 12px; line-height: 1.5; margin-top: 18px; }
-  .abcOfframpAlert.error { background: #3a1d20; border: 1px solid #754043; color: #ffab91; }
-  .abcOfframpAlert.success { background: #0b2e24; border: 1px solid #165b47; color: #a7f3d0; }
-  .abcOfframpAlert.info { background: #0c203a; border: 1px solid #1e406d; color: #93c5fd; }
-
-  /* Light mode overrides */
-  html[data-dashboard-theme="light"] .abcOfframpTitle { color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpSubtitle { color: #647898; }
-  html[data-dashboard-theme="light"] .abcOfframpStep { background: #fff; border-color: #dfe5ec; color: #647898; }
-  html[data-dashboard-theme="light"] .abcOfframpStep.active { background: #fff5ee; border-color: #f45b05; color: #f45b05; }
-  html[data-dashboard-theme="light"] .abcOfframpStep.done { background: #ecfdf5; border-color: #10b981; color: #047857; }
-  html[data-dashboard-theme="light"] .abcOfframpStepNum { background: #cbd5df; color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpStep.active .abcOfframpStepNum { background: #f45b05; color: #fff; }
-  html[data-dashboard-theme="light"] .abcOfframpStep.done .abcOfframpStepNum { background: #10b981; color: #fff; }
-  html[data-dashboard-theme="light"] .abcOfframpCard { background: #fff; border-color: #dfe5ec; color: #102345; box-shadow: 0 12px 28px #1023450d; }
-  html[data-dashboard-theme="light"] .abcOfframpCardHeader { border-color: #dfe5ec; }
-  html[data-dashboard-theme="light"] .abcOfframpCardHeader h2 { color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpField label { color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpInput, html[data-dashboard-theme="light"] .abcOfframpSelect { background: #fafbfc; border-color: #cbd5df; color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpPill { background: #fafbfc; border-color: #cbd5df; color: #647898; }
-  html[data-dashboard-theme="light"] .abcOfframpQuoteCard { background: #fafbfc; border-color: #dfe5ec; }
-  html[data-dashboard-theme="light"] .abcOfframpQuoteItem { background: #fff; border-color: #dfe5ec; }
-  html[data-dashboard-theme="light"] .abcOfframpQuoteItem strong { color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpQuotePayout { background: #ecfdf5; border-color: #a7f3d0; }
-  html[data-dashboard-theme="light"] .abcOfframpQuotePayout strong { color: #047857; }
-  html[data-dashboard-theme="light"] .abcOfframpCopyBox { background: #f7f9fb; border-color: #dfe5ec; color: #102345; }
-  html[data-dashboard-theme="light"] .abcOfframpCopyBtn { background: #fff; border-color: #cbd5df; color: #0284c7; }
-  html[data-dashboard-theme="light"] .abcOfframpBtnSecondary { background: #fff; border-color: #cbd5df; color: #102345; }
-
-  .dashboard input:focus, .dashboard select:focus {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
-    outline: none;
-  }
-
-  @media (max-width: 760px) {
-    .abcOfframpGrid { grid-template-columns: 1fr; }
-    .abcOfframpQuoteGrid { grid-template-columns: 1fr; }
-    .abcOfframpCard { padding: 18px; }
-  }
 }
-
